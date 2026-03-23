@@ -12,27 +12,16 @@ const props = defineProps<{
 }>()
 
 const canvasRef = ref<HTMLDivElement | null>(null)
-
-function getRoleRangeWithHeroes(player: Player, roles: string[]): string[] {
-  const filledRoles = roles.filter(role => player.heroes[role]!.length > 0)
-  if (filledRoles.length === 0) return []
-
-  const firstRole = filledRoles[0]!
-  const lastRole = filledRoles[filledRoles.length - 1]!
-  const startIndex = roles.indexOf(firstRole)
-  const endIndex = roles.indexOf(lastRole)
-
-  return roles.slice(startIndex, endIndex + 1)
-}
+const mainRoles = ['TANK', 'DPS', 'SUPPORT']
 
 const playerRoleRanges = computed(() =>
   props.players.map(player => {
-
-    const filledRoles = props.roles.filter(role => player.heroes[role] !== undefined && player.heroes[role].length > 0) ?? []
+    const filledRoles = mainRoles.filter(role => player.heroes[role] !== undefined && player.heroes[role].length > 0) ?? []
+    console.log(player.heroes);
     if (filledRoles.length === 0) return null
 
-    const startIndex = props.roles.indexOf(filledRoles[0]!)
-    const endIndex = props.roles.indexOf(filledRoles[filledRoles.length - 1]!)
+    const startIndex = mainRoles.indexOf(filledRoles[0]!)
+    const endIndex = mainRoles.indexOf(filledRoles[filledRoles.length - 1]!)
     return {start: startIndex, end: endIndex}
   })
 )
@@ -99,7 +88,7 @@ defineExpose({
   <div
     ref="canvasRef"
     class="mx-auto"
-    style="width: 1920px; height: 1080px; background: linear-gradient(180deg, #151515 10%, #482710 50%, #ff6700 100%); transform: scale(1); transform-origin: top center; margin-bottom: -540px; border: none; outline: none;"
+    style="width: 1920px; height: min-content; background: linear-gradient(180deg, #151515 10%, #482710 50%, #ff6700 100%); transform: scale(1); transform-origin: top center; margin-bottom: -540px; border: none; outline: none;"
   >
     <!-- Header -->
     <div class="pt-16 px-12" style="border: none;">
@@ -119,7 +108,7 @@ defineExpose({
     </div>
 
     <!-- Table -->
-    <div class="px-12 pt-12 h-[800px] flex flex-col gap-7" style="border: none;">
+    <div class="px-12 pt-12 flex flex-col gap-7" style="border: none; height: min-content">
       <!-- Column Headers -->
       <div class="flex mb-8" style="padding-left: 100px; border: none;">
         <div v-for="role in roles.filter(r => !r.toLowerCase().includes('hybrid'))" :key="role"
@@ -152,7 +141,7 @@ defineExpose({
           style="display: flex; gap: 5px; border-radius: 12px; padding: 4px; align-items: center; margin-left: 68px;"
         >
           <!-- before wrapped range -->
-          <div v-for="(role, rIndex) in roles.slice(0, playerRoleRanges[pIndex]?.start || 0)"
+          <div v-for="(role, rIndex) in mainRoles.slice(0, playerRoleRanges[pIndex]?.start || 0)"
                :key="role + '-before'">
             <div class="flex gap-1.5 player-cell" :class="role.toLowerCase().replace(' ', '-')">
             </div>
@@ -165,7 +154,7 @@ defineExpose({
             :class="{ 'multi-role-player': playerIsMultiRole(player) }"
           >
             <div
-              v-for="(role, rIndex) in roles.slice(playerRoleRanges[pIndex].start, playerRoleRanges[pIndex].end + 1)"
+              v-for="(role, rIndex) in mainRoles.slice(playerRoleRanges[pIndex].start, playerRoleRanges[pIndex].end + 1)"
               :key="role + '-wrapped'"
               class="flex gap-1.5 player-cell"
               :class="[
@@ -195,7 +184,7 @@ defineExpose({
 
           <div v-if="playerRoleRanges[pIndex]">
             <div
-              v-for="role in roles.slice(playerRoleRanges[pIndex].end + 1)"
+              v-for="role in mainRoles.slice(playerRoleRanges[pIndex].end + 1)"
               :key="role + '-after'"
             >
               <div class="flex gap-1.5 player-cell" :class="role.toLowerCase().replace(' ', '-')">

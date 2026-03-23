@@ -56,7 +56,7 @@ const emit = defineEmits<{
             :key="role"
             class="p-2"
             @dragover.prevent
-            @drop="emit('drop-hero', pIndex, role)"
+            @drop="emit('drop-hero', pIndex, role.split(' ')[1] ?? role)"
           >
             <div class="flex gap-1 justify-center min-h-14 items-center bg-gray-700 rounded p-2">
               <div

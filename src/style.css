@@ -75,30 +75,14 @@ h2.bold {
   padding: 4px;
 }
 .player-cell.tank {
-  justify-content: flex-start;
+  justify-content: center;
   width: 274px;
 }
-.player-cell.hitscan-dps {
+.player-cell.dps {
   justify-content: flex-start;
   width: 286px;
 }
-.player-cell.hybrid-dps {
-  justify-content: center;
-  width: 106px;
-}
-.player-cell.flex-dps {
-  justify-content: flex-end;
-  width: 268px;
-}
-.player-cell.main-support {
-  justify-content: flex-start;
-  width: 254px;
-}
-.player-cell.hybrid-support {
-  justify-content: center;
-  width: 110px;
-}
-.player-cell.flex-support {
+.player-cell.support {
   justify-content: flex-end;
   width: 290px;
 }
