@@ -1,6 +1,9 @@
-# Overwatch Roster Generator
+# LES Roster Generator
 
 A web app for building, customizing, and exporting Overwatch team rosters. Drag and drop heroes into player slots, manage hero pools, and export your roster as an image for sharing.
+
+> [!NOTE]
+> This repository is a fork of @the-eventhorizon's great work: [Overwatch Roster Generator](https://github.com/the-eventhorizon/ow-roster-generator)
 
 ## Features
 - **Roster Table:** Assign heroes to players by role using drag-and-drop.
@@ -9,8 +12,14 @@ A web app for building, customizing, and exporting Overwatch team rosters. Drag 
 - **Export:** Download your roster as a shareable image.
 - **Responsive UI:** Built with Vue 3, TailwindCSS, and dom-to-image-more.
 
+## Changes
+- **Theme:** Adjusted the design to match the LES theme.
+- **Legal:** Added imprint and privacy policy to meet legal requirements.
+- **Hosting:** Create docker image to containerize and host the web app.
+- **Features:** Minor UI adjustments and additional customization options.
+
 ## Demo
-![App Screenshot](public/demo_screenshot.png)
+<img src="./readme_demo.png" alt="App Screenshot" height="900">
 
 ## Getting Started
 
