@@ -5,9 +5,6 @@ defineProps<{
   heroesByRole: HeroesByRole
   loading: boolean
 }>()
-const generateImagePath = (heroName: string): string => {
-  return `/src/assets/portraits/${heroName}.png`
-}
 const emit = defineEmits<{
   'start-drag': [hero: Hero]
 }>()
@@ -18,14 +15,14 @@ const startDrag = (hero: Hero): void => {
 </script>
 
 <template>
-  <div class="bg-gray-800 p-6 rounded-lg mb-8">
-    <h2 class="text-2xl font-bold mb-4">Heroes (Drag & Drop)</h2>
+  <div class="bg-dark p-6 rounded-lg mb-8">
+    <h2 class="text-3xl bold mb-4 -mt-1">Heroes</h2>
 
     <div v-if="loading" class="text-center py-4">
       Lade Heroes...
     </div>
 
-    <div v-else class="space-y-4 max-h-96 overflow-y-auto">
+    <div v-else class="space-y-4 max-h-96 overflow-y-visible">
       <div v-for="(heroList, role) in heroesByRole" :key="role">
         <h3 class="text-lg font-bold mb-2 capitalize" style="color: #ff6700">
           {{ role }}
@@ -39,7 +36,7 @@ const startDrag = (hero: Hero): void => {
             class="cursor-move hero-portrait"
           >
             <img
-              :src="generateImagePath(hero.key)"
+              :src="hero.portrait"
               :alt="hero.name"
               :title="hero.name"
               class="w-12 h-12 rounded border-2 border-gray-600 hover:border-orange-500"

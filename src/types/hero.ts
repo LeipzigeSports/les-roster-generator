@@ -12,6 +12,9 @@ export interface HeroesByRole {
 }
 
 export interface Player {
+  id: string
   name: string
+  status?: string
+  customStatus?: boolean
   heroes: Record<string, Hero[]>
 }

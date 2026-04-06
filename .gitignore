@@ -37,3 +37,5 @@ __screenshots__/
 
 # Blizzard assets
 src/assets/portraits
+
+.env
