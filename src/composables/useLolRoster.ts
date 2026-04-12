@@ -1,7 +1,7 @@
 import { ref, watch, type Ref } from 'vue'
-import type { Player, Hero } from '../types/hero'
+import type { Hero, Player } from '../types/hero'
 
-interface UseRosterReturn {
+interface UseLolRosterReturn {
   teamName: Ref<string>
   date: Ref<string>
   isTransparentBg: Ref<boolean>
@@ -14,11 +14,10 @@ interface UseRosterReturn {
   removeHero: (playerIndex: number, role: string, heroIndex: number) => void
   toggleMainHero: (playerIndex: number, heroKey: string) => void
   resetRoster: () => void
-  isClassicLayout: Ref<boolean>
 }
 
-export function useRoster(): UseRosterReturn {
-  const CACHE_KEY = 'les_roster_data'
+export function useLolRoster(): UseLolRosterReturn {
+  const CACHE_KEY = 'les_roster_lol_data'
 
   // Load from localStorage if available
   const savedData = localStorage.getItem(CACHE_KEY)
@@ -30,16 +29,13 @@ export function useRoster(): UseRosterReturn {
   const teamName = ref<string>(initialData?.teamName || 'Team Name')
   const date = ref<string>(defaultDate)
   const isTransparentBg = ref<boolean>(initialData?.isTransparentBg || false)
-  const isClassicLayout = ref<boolean>(initialData?.isClassicLayout || false)
   
   const roles = ref<string[]>([
-    'TANK',
-    'HITSCAN DPS',
-    'HYBRID DPS',
-    'FLEX DPS',
-    'MAIN SUPPORT',
-    'HYBRID SUPPORT',
-    'FLEX SUPPORT'
+    'TOP',
+    'JUNGLE',
+    'MID',
+    'BOT',
+    'SUPPORT'
   ])
 
   const defaultPlayers: Player[] = [
@@ -51,17 +47,14 @@ export function useRoster(): UseRosterReturn {
   ]
 
   const loadedPlayers: Player[] = initialData?.players || JSON.parse(JSON.stringify(defaultPlayers))
-  // Ensure every player has a unique id (for existing saves without IDs)
   loadedPlayers.forEach(p => {
     if (!p.id) p.id = Math.random().toString(36).substring(2, 9)
   })
 
   const players = ref<Player[]>(loadedPlayers)
 
-  // Auto-save watch
-
   watch(
-    [teamName, date, isTransparentBg, isClassicLayout, players],
+    [teamName, date, isTransparentBg, players],
     () => {
       localStorage.setItem(
         CACHE_KEY,
@@ -69,7 +62,6 @@ export function useRoster(): UseRosterReturn {
           teamName: teamName.value,
           date: date.value,
           isTransparentBg: isTransparentBg.value,
-          isClassicLayout: isClassicLayout.value,
           players: players.value,
         })
       )
@@ -112,14 +104,10 @@ export function useRoster(): UseRosterReturn {
     if (players.value[playerIndex]!.heroes[role]!.some(h => h.key === hero.key)) {
       return
     }
-    if (!role.includes("HYBRID")) {
-      if (players.value[playerIndex]!.heroes[role].length < 3) {
-        players.value[playerIndex]!.heroes[role].push(hero)
-      }
-    } else {
-      if (players.value[playerIndex]!.heroes[role].length < 2) {
-        players.value[playerIndex]!.heroes[role].push(hero)
-      }
+
+    // High level requirement check: 3 champions per role
+    if (players.value[playerIndex]!.heroes[role].length < 3) {
+      players.value[playerIndex]!.heroes[role].push(hero)
     }
   }
 
@@ -155,7 +143,6 @@ export function useRoster(): UseRosterReturn {
     dropHero,
     removeHero,
     toggleMainHero,
-    resetRoster,
-    isClassicLayout
+    resetRoster
   }
 }

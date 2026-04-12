@@ -65,7 +65,8 @@ const prepareClone = async (): Promise<HTMLElement | null> => {
   await new Promise(resolve => setTimeout(resolve, 300))
 
   const clone = canvasRef.value.cloneNode(true) as HTMLElement
-  clone.style.transform = 'scale(1)'
+  const renderScale = 2560 / 1920
+  clone.style.transform = `scale(${renderScale})`
   clone.style.transformOrigin = 'top left'
   clone.style.position = 'absolute'
   clone.style.left = '-9999px'
@@ -73,7 +74,7 @@ const prepareClone = async (): Promise<HTMLElement | null> => {
   const allElements = clone.querySelectorAll('*')
   allElements.forEach(el => {
     const htmlEl = el as HTMLElement
-    if (htmlEl.classList.contains('important-border') || htmlEl.classList.contains('role-column') || htmlEl.classList.contains('multi-role-player')) return
+    if (htmlEl.classList.contains('important-border') || htmlEl.classList.contains('role-column')) return
     htmlEl.style.border = 'none'
     htmlEl.style.outline = 'none'
     htmlEl.style.boxShadow = 'none'
@@ -89,10 +90,11 @@ const downloadImage = async (): Promise<void> => {
     const clone = await prepareClone()
     if (!clone) return
 
+    const renderScale = 2560 / 1920
     const targetHeight = Math.max(1080, clone.scrollHeight)
     const dataUrl = await domtoimage.toPng(clone, {
-      width: 1920,
-      height: targetHeight,
+      width: 1920 * renderScale,
+      height: targetHeight * renderScale,
       cacheBust: true
     })
 
@@ -115,10 +117,11 @@ const copyImage = async (): Promise<void> => {
     const clone = await prepareClone()
     if (!clone) return
 
+    const renderScale = 2560 / 1920
     const targetHeight = Math.max(1080, clone.scrollHeight)
     const blob = await domtoimage.toBlob(clone, {
-      width: 1920,
-      height: targetHeight,
+      width: 1920 * renderScale,
+      height: targetHeight * renderScale,
       cacheBust: true
     })
 
@@ -244,24 +247,35 @@ defineExpose({
               
               <!-- Dynamic Columns -->
               <template v-for="col in columnConfig" :key="col.id">
-                <!-- Column Has Heroes -->
                 <div v-if="col.subroles.some(sr => (player.heroes[sr]?.length || 0) > 0)" 
-                     class="role-column" 
-                     :style="{ 
-                       width: col.width, 
-                       flex: col.flex, 
-                       display: col.subroles.length > 1 && !isClassicLayout ? 'grid' : 'flex', 
-                       gridTemplateColumns: col.subroles.length > 1 && !isClassicLayout ? '1fr auto 1fr' : 'none',
-                       justifyContent: col.subroles.length > 1 && isClassicLayout ? 'space-between' : 'flex-start',
-                       alignItems: 'center', 
-                       minWidth: 0 
-                     }">
+                    class="role-column" 
+                    :style="{ 
+                      width: col.width, 
+                      flex: col.flex, 
+                      display: col.subroles.length > 1 && !isClassicLayout ? 'grid' : 'flex', 
+                      gridTemplateColumns: col.subroles.length > 1 && !isClassicLayout ? '1fr auto 1fr' : 'none',
+                      justifyContent: col.subroles.length > 1 && isClassicLayout ? 'space-between' : 'flex-start',
+                      alignItems: 'center', 
+                      minWidth: 0,
+                      position: 'relative'
+                    }">
                   
                   <template v-if="col.subroles.length > 1 && !isClassicLayout">
                     <!-- MAIN (Links) -->
                     <div class="flex items-center min-w-0 w-full" :class="(player.heroes[col.subroles[1]!]?.length || 0) > 0 || (player.heroes[col.subroles[2]!]?.length || 0) > 0 ? 'pr-2' : ''">
                       <div class="flex gap-1 shrink-0" :class="{'multi-role-player': (player.heroes[col.subroles[0]!]?.length || 0) > 1}">
-                        <img v-for="(hero, hIndex) in player.heroes[col.subroles[0]!] || []" :key="hIndex" :src="getProxyUrl(hero.portrait)" :alt="hero.name" crossorigin="anonymous" class="important-border" style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" />
+                        <img 
+                          v-for="(hero, hIndex) in player.heroes[col.subroles[0]!] || []" 
+                          :key="hIndex" :src="getProxyUrl(hero.portrait)" 
+                          :alt="hero.name" 
+                          crossorigin="anonymous" 
+                          class="important-border" 
+                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
+                              ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
+                              : '1' 
+                          }"
+                        />
                       </div>
                       <div class="flex-grow h-[2px] rounded" :style="{ marginLeft: (player.heroes[col.subroles[0]!]?.length || 0) > 0 ? '8px' : '0', backgroundColor: 'rgba(255, 255, 255, 0.075)' }"></div>
                     </div>
@@ -269,7 +283,18 @@ defineExpose({
                     <!-- HYBRID (Mitte) -->
                     <div class="flex justify-center shrink-0">
                       <div class="flex gap-1" :class="{'multi-role-player': (player.heroes[col.subroles[1]!]?.length || 0) > 1}">
-                        <img v-for="(hero, hIndex) in player.heroes[col.subroles[1]!] || []" :key="hIndex" :src="getProxyUrl(hero.portrait)" :alt="hero.name" crossorigin="anonymous" class="important-border" style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" />
+                        <img 
+                          v-for="(hero, hIndex) in player.heroes[col.subroles[1]!] || []" 
+                          :key="hIndex" :src="getProxyUrl(hero.portrait)" 
+                          :alt="hero.name" 
+                          crossorigin="anonymous" 
+                          class="important-border" 
+                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
+                              ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
+                              : '1' 
+                          }"
+                        />
                       </div>
                     </div>
 
@@ -277,7 +302,18 @@ defineExpose({
                     <div class="flex items-center min-w-0 w-full" :class="(player.heroes[col.subroles[0]!]?.length || 0) > 0 || (player.heroes[col.subroles[1]!]?.length || 0) > 0 ? 'pl-2' : ''">
                       <div class="flex-grow h-[2px] rounded" :style="{ marginRight: (player.heroes[col.subroles[2]!]?.length || 0) > 0 ? '8px' : '0', backgroundColor: 'rgba(255, 255, 255, 0.075)' }"></div>
                       <div class="flex gap-1 shrink-0" :class="{'multi-role-player': (player.heroes[col.subroles[2]!]?.length || 0) > 1}">
-                        <img v-for="(hero, hIndex) in player.heroes[col.subroles[2]!] || []" :key="hIndex" :src="getProxyUrl(hero.portrait)" :alt="hero.name" crossorigin="anonymous" class="important-border" style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" />
+                        <img 
+                          v-for="(hero, hIndex) in player.heroes[col.subroles[2]!] || []" 
+                          :key="hIndex" :src="getProxyUrl(hero.portrait)" 
+                          :alt="hero.name" 
+                          crossorigin="anonymous" 
+                          class="important-border" 
+                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
+                              ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
+                              : '1' 
+                          }"
+                        />
                       </div>
                     </div>
                   </template>
@@ -286,7 +322,18 @@ defineExpose({
                     <template v-for="(subrole, srIndex) in col.subroles" :key="subrole">
                       <div class="flex gap-1" :class="{'multi-role-player': (player.heroes[subrole]?.length || 0) > 1}"
                            :style="col.subroles.length > 1 ? (srIndex === 0 ? {marginRight: (player.heroes[subrole]?.length || 0) > 0 ? '8px' : '0'} : (srIndex === 1 ? {margin: (player.heroes[subrole]?.length || 0) > 0 ? '0 8px' : '0'} : {marginLeft: (player.heroes[subrole]?.length || 0) > 0 ? '8px' : '0'})) : {}">
-                        <img v-for="(hero, hIndex) in player.heroes[subrole] || []" :key="hIndex" :src="getProxyUrl(hero.portrait)" :alt="hero.name" crossorigin="anonymous" class="important-border" style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" />
+                        <img 
+                          v-for="(hero, hIndex) in player.heroes[subrole] || []" 
+                          :key="hIndex" :src="getProxyUrl(hero.portrait)" 
+                          :alt="hero.name" 
+                          crossorigin="anonymous" 
+                          class="important-border" 
+                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
+                              ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
+                              : '1' 
+                          }"
+                        />
                       </div>
                       
                       <!-- Separator Line -->
@@ -297,11 +344,21 @@ defineExpose({
                   <template v-else>
                     <div v-for="(subrole, srIndex) in col.subroles" :key="subrole" class="flex items-center">
                       <div class="flex gap-1" :class="{'multi-role-player': (player.heroes[subrole]?.length || 0) > 1}">
-                        <img v-for="(hero, hIndex) in player.heroes[subrole] || []" :key="hIndex" :src="getProxyUrl(hero.portrait)" :alt="hero.name" crossorigin="anonymous" class="important-border" style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" />
+                        <img 
+                          v-for="(hero, hIndex) in player.heroes[subrole] || []" 
+                          :key="hIndex" :src="getProxyUrl(hero.portrait)" 
+                          :alt="hero.name" 
+                          crossorigin="anonymous" 
+                          class="important-border" 
+                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
+                              ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
+                              : '1' 
+                          }"
+                        />
                       </div>
                     </div>
                   </template>
-
                 </div>
                 
                 <!-- Column is Empty -->
@@ -313,8 +370,10 @@ defineExpose({
         </div>
 
         <!-- Canvas Disclaimer -->
-        <div class="w-full text-center -mt-1 mb-2 px-12 opacity-25" style="color: #e5e5e5; font-size: 14px; font-family: 'Geom Graphic W03 Regular Italic', sans-serif;">
-          Overwatch und alle zugehörigen Grafiken sind Eigentum von Blizzard Entertainment. Keine offizielle Partnerschaft.
+        <div class="w-full text-center mt-6 mb-4 px-12 opacity-20">
+          <p class="text-[11px] leading-tight tracking-wider" style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance;">
+            Overwatch und alle zugehörigen Grafiken sind Eigentum von Blizzard Entertainment. Keine offizielle Partnerschaft.
+          </p>
         </div>
       </div>
     </div>

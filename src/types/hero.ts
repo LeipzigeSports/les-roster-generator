@@ -2,7 +2,7 @@ export interface Hero {
   key: string
   name: string
   portrait: string
-  role: 'tank' | 'damage' | 'support'
+  role: string
 }
 
 export interface HeroesByRole {
@@ -17,4 +17,5 @@ export interface Player {
   status?: string
   customStatus?: boolean
   heroes: Record<string, Hero[]>
+  mainHeroKeys?: string[]
 }
