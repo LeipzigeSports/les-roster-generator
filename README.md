@@ -1,4 +1,4 @@
-# LES Roster Generator
+# Overwatch Roster Generator
 
 A web app for building, customizing, and exporting team rosters for different games. Drag and drop heroes into player slots, manage hero pools, and export your roster as an image for sharing.
 
