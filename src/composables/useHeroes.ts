@@ -18,9 +18,10 @@ export function useHeroes(): UseHeroesReturn {
       support: []
     }
 
-    heroes.value.forEach(hero => {
-      if (grouped[hero.role]) {
-        grouped[hero.role].push(hero)
+    heroes.value.forEach((hero: Hero) => {
+      const role = hero.role as keyof HeroesByRole
+      if (grouped[role]) {
+        grouped[role].push(hero)
       }
     })
 

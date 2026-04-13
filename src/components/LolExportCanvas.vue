@@ -218,12 +218,12 @@ defineExpose({
             <div style="flex: 1; display: flex; justify-content: space-between; margin-left: 32px;">
               <template v-for="role in roles" :key="role">
                 <div class="flex justify-center items-center" style="width: 224px;">
-                  <div v-if="player.heroes[role] && player.heroes[role].length > 0" class="role-column flex justify-center items-center" 
+                  <div v-if="player.heroes[role as string] && player.heroes[role as string].length > 0" class="role-column flex justify-center items-center" 
                        style="flex: none; width: 224px; position: relative;">
                     
                       <div class="flex gap-1 shrink-0">
                           <img 
-                            v-for="(hero, hIndex) in player.heroes[role]" 
+                            v-for="(hero, hIndex) in player.heroes[role as string]" 
                             :key="hIndex" :src="getProxyUrl(hero.portrait)" 
                             :alt="hero.name" 
                             crossorigin="anonymous" 

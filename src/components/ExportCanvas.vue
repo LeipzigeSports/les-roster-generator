@@ -27,7 +27,7 @@ const getProxyUrl = (url: string) => {
 }
 
 function getRoleRangeWithHeroes(player: Player, roles: string[]): string[] {
-  const filledRoles = roles.filter(role => (player.heroes[role]?.length || 0) > 0)
+  const filledRoles = roles.filter(role => (player.heroes[role as string]?.length || 0) > 0)
   if (filledRoles.length === 0) return []
 
   const firstRole = filledRoles[0]!
@@ -41,7 +41,7 @@ function getRoleRangeWithHeroes(player: Player, roles: string[]): string[] {
 const playerRoleRanges = computed(() =>
   props.players.map(player => {
 
-    const filledRoles = props.roles.filter(role => (player.heroes[role]?.length || 0) > 0)
+    const filledRoles = props.roles.filter(role => (player.heroes[role as string]?.length || 0) > 0)
     if (filledRoles.length === 0) return null
 
     const startIndex = props.roles.indexOf(filledRoles[0]!)
@@ -51,7 +51,7 @@ const playerRoleRanges = computed(() =>
 )
 
 const playerIsMultiRole = (player: Player): boolean => {
-  const rolesPlayed = Object.keys(player.heroes).filter(role => (player.heroes[role]?.length || 0) > 0)
+  const rolesPlayed = Object.keys(player.heroes).filter(role => (player.heroes[role as string]?.length || 0) > 0)
   return rolesPlayed.length > 1
 }
 
@@ -247,7 +247,7 @@ defineExpose({
               
               <!-- Dynamic Columns -->
               <template v-for="col in columnConfig" :key="col.id">
-                <div v-if="col.subroles.some(sr => (player.heroes[sr]?.length || 0) > 0)" 
+                <div v-if="col.subroles.some(sr => (player.heroes[sr as string]?.length || 0) > 0)" 
                     class="role-column" 
                     :style="{ 
                       width: col.width, 

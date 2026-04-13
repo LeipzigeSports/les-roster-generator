@@ -97,7 +97,7 @@ const scrollToSelected = () => {
 }
 
 const canAddHero = (player: Player, role: string) => {
-  const count = player.heroes[role]?.length || 0
+  const count = player.heroes[role as string]?.length || 0
   const max = 3 // Max 3 per role for LoL
   return count < max
 }
@@ -369,7 +369,7 @@ onUnmounted(() => {
               class="flex gap-1 justify-center min-h-16 items-center bg-light-dark/40 rounded p-1.5 min-w-[130px] relative"
             >
               <div
-                v-for="(hero, hIndex) in player.heroes[role] || []"
+                v-for="(hero, hIndex) in player.heroes[role as string] || []"
                 :key="hero.key"
                 class="relative group cursor-pointer"
               >
@@ -429,7 +429,7 @@ onUnmounted(() => {
                         :class="`search-input-${pIndex}-${role.replace(/\s+/g, '-')}`"
                         class="hero-search-input"
                         :value="searchState.query"
-                        @input="(e: any) => searchState!.query = e.target.value"
+                        @input="(e: Event) => searchState!.query = (e.target as HTMLInputElement).value"
                         @keydown="handleKeyDown"
                         @blur="handleBlur"
                       />
