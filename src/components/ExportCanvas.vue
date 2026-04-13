@@ -247,7 +247,7 @@ defineExpose({
               
               <!-- Dynamic Columns -->
               <template v-for="col in columnConfig" :key="col.id">
-                <div v-if="col.subroles.some(sr => (player.heroes[sr]?.length || 0) > 0)" 
+                <div v-if="col.subroles.some(sr => (player.heroes[sr as string]?.length || 0) > 0)" 
                     class="role-column" 
                     :style="{ 
                       width: col.width, 
