@@ -218,7 +218,7 @@ defineExpose({
             <div style="flex: 1; display: flex; justify-content: space-between; margin-left: 32px;">
               <template v-for="role in roles" :key="role">
                 <div class="flex justify-center items-center" style="width: 224px;">
-                  <div v-if="player.heroes[role as string] && player.heroes[role as string].length > 0" class="role-column flex justify-center items-center" 
+                  <div v-if="player.heroes[role as string]?.length" class="role-column flex justify-center items-center" 
                        style="flex: none; width: 224px; position: relative;">
                     
                       <div class="flex gap-1 shrink-0">
@@ -229,7 +229,7 @@ defineExpose({
                             crossorigin="anonymous" 
                             class="important-border" 
                             style="width: 68px; height: 68px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
-                            :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
+                            :style="{ opacity: (player.mainHeroKeys?.length) 
                                 ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
                                 : '1' 
                             }"
