@@ -27,9 +27,10 @@ const emit = defineEmits(['close'])
           <h3 class="bold text-xl mb-3" style="color: #ff6700">3. Einbindung von Drittanbietern & Datenübertragung</h3>
           <p>Zur Darstellung der Helden-Daten und zur technischen Erstellung des Bild-Exports nutzen wir externe Schnittstellen. Dabei wird Ihre IP-Adresse an folgende Anbieter übertragen:</p>
           <ul class="list-disc pl-6 mt-3 space-y-3">
-            <li><strong>Overfast API:</strong> Zum Abruf aktueller Helden-Informationen und Spieldaten.</li>
-            <li><strong>Blizzard Entertainment, Inc.:</strong> Zum Laden der offiziellen Helden-Porträts und Rollen-Icons.</li>
-            <li><strong>Images.weserv.nl:</strong> Dieser Bild-Proxy wird genutzt, um die externen Grafiken technisch für den lokalen Download als PNG-Datei aufzubereiten.</li>
+            <li><strong>Overfast API:</strong> Zum Abruf aktueller Overwatch-Helden-Informationen und Spieldaten.</li>
+            <li><strong>Blizzard Entertainment, Inc.:</strong> Zum Laden der offiziellen Overwatch-Helden-Porträts und Rollen-Icons.</li>
+            <li><strong>Riot Games (Data Dragon API):</strong> Zum Abruf von League of Legends Champion-Informationen und Porträts.</li>
+            <li><strong>Images.weserv.nl:</strong> Dieser Bild-Proxy wird genutzt, um die externen Grafiken (Overwatch & LoL) technisch für den lokalen Download als PNG-Datei aufzubereiten.</li>
           </ul>
           <p class="mt-4 italic" style="opacity: 0.8">Rechtsgrundlage: Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer funktionalen und ansprechenden Bereitstellung unseres Community-Angebots gemäß Art. 6 Abs. 1 lit. f DSGVO.</p>
         </section>
@@ -51,7 +52,7 @@ const emit = defineEmits(['close'])
 
         <section class="border-t border-white/10 pt-6">
           <h3 class="bold text-xl mb-3" style="color: #ff6700">6. Ergänzende Hinweise</h3>
-          <p>Dieses Tool ist ein inoffizielles Community-Projekt. Overwatch und alle zugehörigen Assets sind Eigentum von Blizzard Entertainment. Für die allgemeine Datenverarbeitung des Vereins gilt zudem die Datenschutzerklärung unserer Hauptseite: <a href="https://leipzigesports.de/datenschutz" target="_blank" class="hover:underline" style="color: #ff6700">leipzigesports.de/datenschutz</a>.</p>
+          <p>Dieses Tool ist ein inoffizielles Community-Projekt. Overwatch und alle zugehörigen Assets sind Eigentum von Blizzard Entertainment. League of Legends und alle zugehörigen Assets sind Eigentum von Riot Games. Für die allgemeine Datenverarbeitung des Vereins gilt zudem die Datenschutzerklärung unserer Hauptseite: <a href="https://leipzigesports.de/datenschutz" target="_blank" class="hover:underline" style="color: #ff6700">leipzigesports.de/datenschutz</a>.</p>
         </section>
       </div>
 

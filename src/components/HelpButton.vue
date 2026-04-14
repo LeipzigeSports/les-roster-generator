@@ -44,7 +44,12 @@ const showHelp = ref(false)
               </div>
               <div class="flex-grow">
                 <h3 class="bold text-xl mb-1" style="color: #e5e5e5">Helden zuweisen</h3>
-                <p class="opacity-70">Nutze <strong>Drag & Drop</strong> aus dem Pool oben oder klicke auf das <strong>"+" Symbol</strong> in einer Tabellenzelle, um Helden hinzuzufügen. Ein Klick auf ein bereits zugewiesenes Bild entfernt dieses wieder.</p>
+                <p class="opacity-70">Nutze <strong>Drag & Drop</strong> aus dem Pool oben oder klicke auf das 
+                  <span class="inline-flex items-center justify-center px-1 py-1 bg-white/5 rounded border border-white/10 align-middle -mt-1 mr-1">
+                    <span class="text-lg" style="color: #e5e5e5; line-height: 1; font-family: 'Geom Graphic W03 Bold Italic', sans-serif; font-size: 1.1rem;">+</span>
+                  </span>
+                  <strong>Plus</strong> in einer Tabellenzelle, um Helden hinzuzufügen. Ein Klick auf ein bereits zugewiesenes Bild entfernt dieses wieder.
+                </p>
               </div>
             </div>
 
@@ -59,7 +64,11 @@ const showHelp = ref(false)
                   <span class="inline-flex items-center gap-1.5 align-middle px-1.5 py-1.5 bg-white/5 rounded border border-white/10 -mt-1">
                     <svg width="8" height="11" viewBox="1 1 8 12" fill="#e5e5e5"><circle cx="2" cy="2" r="1.5"/><circle cx="8" cy="2" r="1.5"/><circle cx="2" cy="7" r="1.5"/><circle cx="8" cy="7" r="1.5"/><circle cx="2" cy="12" r="1.5"/><circle cx="8" cy="12" r="1.5"/></svg>
                   </span> 
-                  <strong> Griff</strong> um und lege über das <strong>Status-Menü</strong> Rollen wie IGL oder Tryout fest. Alle Änderungen werden automatisch im Browser gespeichert.
+                  <strong> Griff</strong> um und lege über das <strong>Status-Menü</strong> Rollen fest. Markiere zudem Charaktere als <strong>Main</strong>, indem du oben rechts auf den 
+                  <span class="inline-flex items-center justify-center px-0.5 py-1.5 bg-white/5 rounded border border-white/10 align-middle -mt-1 mr-1">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#e5e5e5"><path d="M12 1.7L15 8.3L22.2 9.3L17 14.3L18.2 21.5L12 18L5.8 21.5L7 14.3L1.8 9.3L9 8.3L12 1.7Z" /></svg>
+                  </span>
+                  <strong>Stern</strong> klickst (erscheint beim Hovern). Alle Änderungen werden automatisch im Browser gespeichert.
                 </p>
               </div>
             </div>

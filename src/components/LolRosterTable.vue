@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
-import type { Player, Hero, HeroesByRole } from '../types/hero'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import type { Player, Hero } from '../types/hero'
 
 const props = defineProps<{
   players: Player[]
   roles: string[]
-  heroesByRole: HeroesByRole
+  champions: any[]
 }>()
 
 const emit = defineEmits<{
@@ -28,14 +28,15 @@ const searchState = ref<{
 
 const filteredHeroes = computed(() => {
   if (!searchState.value) return []
-  const { role, query } = searchState.value
+  const { query } = searchState.value
 
-  let key: 'tank' | 'damage' | 'support' = 'tank'
-  if (role.toLowerCase().includes('tank')) key = 'tank'
-  else if (role.toLowerCase().includes('dps')) key = 'damage'
-  else if (role.toLowerCase().includes('support')) key = 'support'
+  const hList = props.champions.map(c => ({
+    key: c.id,
+    name: c.name,
+    portrait: c.portraitUrl,
+    role: 'lol' // placeholder
+  } as Hero))
 
-  const hList = props.heroesByRole?.[key] || []
   if (!query) return hList.sort((a, b) => a.name.localeCompare(b.name))
 
   return hList
@@ -97,7 +98,7 @@ const scrollToSelected = () => {
 
 const canAddHero = (player: Player, role: string) => {
   const count = player.heroes[role as string]?.length || 0
-  const max = role.includes('HYBRID') ? 2 : 3
+  const max = 3 // Max 3 per role for LoL
   return count < max
 }
 
@@ -216,7 +217,7 @@ const handleOutsideInteraction = (e: Event) => {
       return
     }
   }
-  
+
   if (e.type === 'scroll') {
     const target = e.target as HTMLElement
     // Ignore internal scrolling of the suggestions list
@@ -224,12 +225,10 @@ const handleOutsideInteraction = (e: Event) => {
       return
     }
   }
-
+  
   activeStatusDropdown.value = null
   searchState.value = null
 }
-
-import { onMounted, onUnmounted } from 'vue'
 
 onMounted(() => {
   window.addEventListener('scroll', handleOutsideInteraction, true)
@@ -252,7 +251,7 @@ onUnmounted(() => {
         <button
           @click="emit('reset-roster')"
           class="flex items-center text-lg gap-2 pl-3.5 pr-4 py-2 rounded justify-center cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
-          style="color: #ff6700; background: transparent; border-color: rgba(255, 103, 0, 0.3);"
+          style="color: #ff6700; background: transparent; border: 1px solid rgba(255, 103, 0, 0.3);"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -426,7 +425,7 @@ onUnmounted(() => {
                     <div class="w-full relative px-2">
                       <input
                         type="text"
-                        placeholder="Held suchen..."
+                        placeholder="Champion suchen..."
                         :class="`search-input-${pIndex}-${role.replace(/\s+/g, '-')}`"
                         class="hero-search-input"
                         :value="searchState.query"
