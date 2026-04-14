@@ -1,7 +1,7 @@
 services:
 
   roster-generator:
-    image: les-roster-generator:0.0.1
+    image: ghcr.io/leipzigesports/les-roster-generator:latest
     container_name: les-roster-generator
     ports:
       - '8080:8080'
