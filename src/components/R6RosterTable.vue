@@ -1,51 +1,47 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import type { Player, Hero } from '../types/hero'
+import type { R6Player, R6Operator } from '../types/r6operator'
+import { useR6Operators } from '../composables/useR6Operators'
 
 const props = defineProps<{
-  players: Player[]
-  roles: string[]
-  champions: any[]
+  players: R6Player[]
+  operators: R6Operator[]
 }>()
 
 const emit = defineEmits<{
   'add-player': []
   'remove-player': [index: number]
   'move-player': [fromIndex: number, toIndex: number]
-  'drop-hero': [playerIndex: number, role: string]
-  'add-hero-obj': [playerIndex: number, role: string, hero: Hero]
-  'remove-hero': [playerIndex: number, role: string, heroIndex: number]
-  'toggle-main-hero': [playerIndex: number, heroKey: string]
+  'drop-operator': [playerIndex: number]
+  'add-operator-obj': [playerIndex: number, operator: R6Operator]
+  'remove-operator': [playerIndex: number, opIndex: number]
+  'toggle-main-operator': [playerIndex: number, opId: string]
 }>()
+
+const { getOperatorIcon } = useR6Operators()
 
 const searchState = ref<{
   pIndex: number
-  role: string
   query: string
   selectedIndex: number
 } | null>(null)
 
-const filteredHeroes = computed(() => {
+const filteredOperators = computed(() => {
   if (!searchState.value) return []
   const { query } = searchState.value
 
-  const hList = props.champions.map(c => ({
-    key: c.id,
-    name: c.name,
-    portrait: c.portraitUrl,
-    role: 'lol' // placeholder
-  } as Hero))
+  const list = props.operators
 
-  if (!query) return hList.sort((a, b) => a.name.localeCompare(b.name))
+  if (!query) return list.slice().sort((a, b) => a.name.localeCompare(b.name))
 
-  return hList
-    .filter((h: Hero) => h.name.toLowerCase().startsWith(query.toLowerCase()))
+  return list
+    .filter((op: R6Operator) => op.name.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name))
 })
 
-const selectHero = (hero: Hero) => {
+const selectOperator = (operator: R6Operator) => {
   if (searchState.value) {
-    emit('add-hero-obj', searchState.value.pIndex, searchState.value.role, hero)
+    emit('add-operator-obj', searchState.value.pIndex, operator)
     searchState.value = null
   }
 }
@@ -55,19 +51,19 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
   if (e.key === 'ArrowDown') {
     e.preventDefault()
-    if (filteredHeroes.value.length > 0) {
-      searchState.value.selectedIndex = (searchState.value.selectedIndex + 1) % filteredHeroes.value.length
+    if (filteredOperators.value.length > 0) {
+      searchState.value.selectedIndex = (searchState.value.selectedIndex + 1) % filteredOperators.value.length
       scrollToSelected()
     }
   } else if (e.key === 'ArrowUp') {
     e.preventDefault()
-    if (filteredHeroes.value.length > 0) {
-      searchState.value.selectedIndex = (searchState.value.selectedIndex - 1 + filteredHeroes.value.length) % filteredHeroes.value.length
+    if (filteredOperators.value.length > 0) {
+      searchState.value.selectedIndex = (searchState.value.selectedIndex - 1 + filteredOperators.value.length) % filteredOperators.value.length
       scrollToSelected()
     }
-  } else if (e.key === 'Enter' && filteredHeroes.value.length > 0) {
-    const hero = filteredHeroes.value[searchState.value.selectedIndex]
-    if (hero) selectHero(hero)
+  } else if (e.key === 'Enter' && filteredOperators.value.length > 0) {
+    const op = filteredOperators.value[searchState.value.selectedIndex]
+    if (op) selectOperator(op)
     const target = e.target as HTMLInputElement
     target.value = ''
     target.blur()
@@ -95,16 +91,14 @@ const scrollToSelected = () => {
   })
 }
 
-const canAddHero = (player: Player, role: string) => {
-  const count = player.heroes[role as string]?.length || 0
-  const max = 3 // Max 3 per role for LoL
-  return count < max
+const canAddOperator = (player: R6Player) => {
+  return player.operators.length < 4
 }
 
 const searchPosition = ref({ top: 0, left: 0, width: 0, height: 0 })
 
-const openSearch = (pIndex: number, role: string, event: MouseEvent) => {
-  searchState.value = { pIndex, role, query: '', selectedIndex: 0 }
+const openSearch = (pIndex: number, event: MouseEvent) => {
+  searchState.value = { pIndex, query: '', selectedIndex: 0 }
   
   const btn = event.currentTarget as HTMLElement
   const cell = btn.closest('td')
@@ -119,13 +113,12 @@ const openSearch = (pIndex: number, role: string, event: MouseEvent) => {
   }
 
   nextTick(() => {
-    const input = document.querySelector(`.search-input-${pIndex}-${role.replace(/\s+/g, '-')}`) as HTMLInputElement
+    const input = document.querySelector(`.search-input-${pIndex}`) as HTMLInputElement
     if (input) input.focus()
   })
 }
 
 const handleBlur = () => {
-  // Delay to allow mousedown on suggestions to trigger first
   setTimeout(() => {
     searchState.value = null
   }, 200)
@@ -191,14 +184,14 @@ const toggleStatusDropdown = (pIndex: number, event: MouseEvent) => {
   activeStatusDropdown.value = pIndex
 }
 
-const selectStatus = (player: Player, val: string) => {
+const selectStatus = (player: R6Player, val: string) => {
   if (val === 'CUSTOM') {
-    player.customStatus = true
+    (player as any).customStatus = true
     if (['', 'TRYOUT', 'IGL', 'MANAGER', 'CAPTAIN'].includes(player.status || '')) {
       player.status = '...'
     }
   } else {
-    player.customStatus = false
+    (player as any).customStatus = false
     player.status = val
   }
   activeStatusDropdown.value = null
@@ -207,7 +200,6 @@ const selectStatus = (player: Player, val: string) => {
 const handleOutsideInteraction = (e: Event) => {
   if (e instanceof MouseEvent) {
     const target = e.target as HTMLElement
-    // Don't close if interacting with the toggle buttons or the menus themselves
     if (target.closest('.subtle-dropdown-btn') || 
         target.closest('.status-dropdown-menu') || 
         target.closest('.add-hero-btn') || 
@@ -219,7 +211,6 @@ const handleOutsideInteraction = (e: Event) => {
 
   if (e.type === 'scroll') {
     const target = e.target as HTMLElement
-    // Ignore internal scrolling of the suggestions list
     if (target.closest?.('.hero-suggestions-list')) {
       return
     }
@@ -261,10 +252,8 @@ onUnmounted(() => {
         <thead>
         <tr class="text-sm" style="font-family: 'Geom Graphic W03 Bold Italic', sans-serif; text-transform: uppercase; line-height: 1.1;">
           <th class="p-2 w-6"></th>
-          <th class="p-2 text-left w-32">Spieler</th>
-          <th v-for="role in roles" :key="role" class="p-2 text-center min-w-[124px]">
-            {{ role }}
-          </th>
+          <th class="p-2 text-left w-64">Spieler</th>
+          <th class="p-2 text-center">Operators (max. 4)</th>
           <th class="p-2 w-12"></th>
         </tr>
         </thead>
@@ -301,15 +290,15 @@ onUnmounted(() => {
             <input
               v-model="player.name"
               type="text"
-              class="bg-light-dark text-lg px-1.5 py-0.5 rounded w-32 text-white block outline-none border border-transparent focus:border-[#ff6700]/30"
+              class="bg-light-dark text-lg px-1.5 py-0.5 rounded w-56 text-white block outline-none border border-transparent focus:border-[#ff6700]/30"
             />
             <div class="flex flex-col gap-1 mt-1">
-              <div class="relative w-32 status-dropdown">
+              <div class="relative w-56 status-dropdown">
                 <button
                   @click.stop="toggleStatusDropdown(pIndex, $event)"
                   class="subtle-dropdown-btn group"
                 >
-                  <span class="truncate">{{ !player.status && !player.customStatus ? 'Status...' : (['TRYOUT', 'IGL', 'MANAGER', 'CAPTAIN'].includes(player.status || '') && !player.customStatus ? player.status : 'Custom') }}</span>
+                  <span class="truncate">{{ !player.status && !(player as any).customStatus ? 'Status...' : (['TRYOUT', 'IGL', 'MANAGER', 'CAPTAIN'].includes(player.status || '') && !(player as any).customStatus ? player.status : 'Custom') }}</span>
                   <span class="text-[7px] opacity-40 group-hover:opacity-100 transition-opacity">▼</span>
                 </button>
 
@@ -328,7 +317,7 @@ onUnmounted(() => {
                       :key="opt"
                       @click.stop="selectStatus(player, opt)"
                       class="status-dropdown-item"
-                      :class="{ 'active': ((!opt && !player.status && !player.customStatus) || (opt === player.status && !player.customStatus) || (opt === 'CUSTOM' && player.customStatus)) }"
+                      :class="{ 'active': ((!opt && !player.status && !(player as any).customStatus) || (opt === player.status && !(player as any).customStatus) || (opt === 'CUSTOM' && (player as any).customStatus)) }"
                     >
                       {{ opt || 'Keine Auswahl' }}
                     </div>
@@ -336,45 +325,43 @@ onUnmounted(() => {
                 </Teleport>
               </div>
               <input
-                v-if="player.customStatus || (player.status && !['', 'TRYOUT', 'IGL', 'MANAGER', 'CAPTAIN'].includes(player.status))"
+                v-if="(player as any).customStatus || (player.status && !['', 'TRYOUT', 'IGL', 'MANAGER', 'CAPTAIN'].includes(player.status))"
                 v-model="player.status"
                 type="text"
                 placeholder="Benutzerdefinierter Status..."
-                class="bg-light-dark px-1.5 py-1 rounded w-32 text-gray-300 text-[10px] border border-white/5 italic outline-none focus:border-[#ff6700]/30"
+                class="bg-light-dark px-1.5 py-1 rounded w-56 text-gray-300 text-[10px] border border-white/5 italic outline-none focus:border-[#ff6700]/30"
               />
             </div>
           </td>
           <td
-            v-for="role in roles"
-            :key="role"
             class="p-2 relative"
             @dragover.prevent
-            @drop="emit('drop-hero', pIndex, role)"
+            @drop="emit('drop-operator', pIndex)"
           >
             <TransitionGroup
               name="hero-item"
               tag="div"
-              class="flex gap-1 justify-center min-h-16 items-center bg-light-dark/40 rounded p-1.5 min-w-[130px] relative"
+              class="flex gap-1 justify-center min-h-24 items-center bg-light-dark/40 rounded p-1.5 min-w-[200px] relative"
             >
               <div
-                v-for="(hero, hIndex) in player.heroes[role as string] || []"
-                :key="hero.key"
+                v-for="(op, opIdx) in player.operators"
+                :key="`${op.id}-${opIdx}`"
                 class="relative group cursor-pointer"
               >
                 <img
-                  :src="hero.portrait"
-                  :alt="hero.name"
-                  class="w-10 h-10 rounded border transition-all"
-                  :class="player.mainHeroKeys?.includes(hero.key) ? 'border-[#ff6700] ring-1 ring-[#ff6700]/50' : 'border-white/10'"
-                  @click="emit('remove-hero', pIndex, role, hIndex)"
+                  :src="getOperatorIcon(op.id)"
+                  :alt="op.name"
+                  class="w-18 h-18 rounded border transition-all"
+                  :class="(player as any).mainOpKeys?.includes(op.id) ? 'border-[#ff6700] ring-1 ring-[#ff6700]/50' : 'border-white/10'"
+                  @click="emit('remove-operator', pIndex, opIdx)"
                 />
                 
                 <!-- Main Toggle Star -->
                 <button
-                  @click.stop="emit('toggle-main-hero', pIndex, hero.key)"
+                  @click.stop="emit('toggle-main-operator', pIndex, op.id)"
                   class="main-hero-star"
-                  :class="{ active: player.mainHeroKeys?.includes(hero.key) }"
-                  :title="player.mainHeroKeys?.includes(hero.key) ? 'Markierung als Main entfernen' : 'als Main markieren'"
+                  :class="{ active: (player as any).mainOpKeys?.includes(op.id) }"
+                  :title="(player as any).mainOpKeys?.includes(op.id) ? 'Markierung als Main entfernen' : 'als Main markieren'"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 1.7L15 8.3L22.2 9.3L17 14.3L18.2 21.5L12 18L5.8 21.5L7 14.3L1.8 9.3L9 8.3L12 1.7Z" />
@@ -387,19 +374,19 @@ onUnmounted(() => {
               </div>
 
               <!-- Inline Search/Add -->
-              <div v-if="canAddHero(player, role)" :key="'add-btn-' + role" class="flex items-center">
+              <div v-if="canAddOperator(player)" :key="'add-btn'" class="flex items-center">
                 <button
-                  v-if="!(searchState?.pIndex === pIndex && searchState?.role === role)"
-                  @click.stop="openSearch(pIndex, role, $event)"
+                  v-if="!(searchState?.pIndex === pIndex)"
+                  @click.stop="openSearch(pIndex, $event)"
                   class="add-hero-btn"
-                  title="Held suchen"
+                  title="Operator suchen"
                 >
                   <span class="text-xl mb-0.25">+</span>
                 </button>
                 
                 <Teleport to="body">
                   <div
-                    v-if="searchState?.pIndex === pIndex && searchState?.role === role"
+                    v-if="searchState?.pIndex === pIndex"
                     class="hero-search-overlay animate-fade-in"
                     :style="{
                       top: searchPosition.top + 'px',
@@ -413,8 +400,8 @@ onUnmounted(() => {
                     <div class="w-full relative px-2">
                       <input
                         type="text"
-                        placeholder="Champion suchen..."
-                        :class="`search-input-${pIndex}-${role.replace(/\s+/g, '-')}`"
+                        placeholder="Operator suchen..."
+                        :class="`search-input-${pIndex}`"
                         class="hero-search-input"
                         :value="searchState.query"
                         @input="(e: Event) => searchState!.query = (e.target as HTMLInputElement).value"
@@ -424,16 +411,16 @@ onUnmounted(() => {
 
                       <div v-if="searchState.query" class="hero-suggestions-list">
                         <div
-                          v-for="(hero, idx) in filteredHeroes"
-                          :key="hero.key"
-                          @mousedown.prevent="selectHero(hero)"
+                          v-for="(op, idx) in filteredOperators"
+                          :key="op.id"
+                          @mousedown.prevent="selectOperator(op)"
                           class="hero-suggestion-item"
                           :class="{ 'active': searchState.selectedIndex === idx }"
                         >
-                          <img :src="hero.portrait" :alt="hero.name" class="hero-suggestion-img" />
-                          <span class="hero-suggestion-name">{{ hero.name }}</span>
+                          <img :src="getOperatorIcon(op.id)" :alt="op.name" class="hero-suggestion-img" />
+                          <span class="hero-suggestion-name">{{ op.name }}</span>
                         </div>
-                        <div v-if="filteredHeroes.length === 0" class="p-3 text-[10px] text-gray-500 text-center uppercase font-bold">
+                        <div v-if="filteredOperators.length === 0" class="p-3 text-[10px] text-gray-500 text-center uppercase font-bold">
                           Keine Treffer
                         </div>
                       </div>
@@ -457,3 +444,20 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.add-hero-btn {
+  width: 48px;
+  height: 48px;
+}
+.hero-suggestion-img {
+  width: 48px;
+  height: 48px;
+}
+.hero-suggestion-name {
+  font-size: 14px;
+}
+.subtle-dropdown-btn {
+  width: 100% !important;
+}
+</style>

@@ -36,7 +36,7 @@ const wrapperStyle = computed(() => {
       <p v-if="route.name === 'home' || route.path === '/'" 
          class="text-[10px] tracking-widest opacity-30 mb-4 px-8 text-center" 
          style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance;">
-        Inoffizielles Community-Projekt. Alle Logos & Spiel-Inhalte sind Eigentum von Blizzard Entertainment & Riot Games.
+        Inoffizielles Community-Projekt. Alle Logos & Spiel-Inhalte sind Eigentum von Blizzard Entertainment, Riot Games & Ubisoft Entertainment.
       </p>
       <div class="flex gap-4 mt-2 text-sm font-bold uppercase" style="color: #ff6700; opacity: 0.67;">
         <a href="https://leipzigesports.de/impressum" target="_blank" class="hover:underline cursor-pointer">Impressum</a>

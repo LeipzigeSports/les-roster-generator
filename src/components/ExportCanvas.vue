@@ -76,9 +76,10 @@ const prepareClone = async (): Promise<HTMLElement | null> => {
     const htmlEl = el as HTMLElement
     if (htmlEl.classList.contains('important-border') || htmlEl.classList.contains('role-column')) return
     htmlEl.style.border = 'none'
-    htmlEl.style.outline = 'none'
     htmlEl.style.boxShadow = 'none'
-    htmlEl.style.whiteSpace = 'nowrap'
+    if (!htmlEl.classList.contains('allow-wrap')) {
+      htmlEl.style.whiteSpace = 'nowrap'
+    }
   })
 
   document.body.appendChild(clone)
@@ -145,7 +146,7 @@ const internalHeight = ref(1080)
 const scale = ref(1)
 
 const columnConfig = [
-  { id: 'TANK', width: '230px', flex: 'none', subroles: ['TANK'] },
+  { id: 'TANK', width: '272px', flex: 'none', subroles: ['TANK'] },
   { id: 'DPS', width: 'auto', flex: '1', subroles: ['HITSCAN DPS', 'HYBRID DPS', 'FLEX DPS'] },
   { id: 'SUPPORT', width: 'auto', flex: '1', subroles: ['MAIN SUPPORT', 'HYBRID SUPPORT', 'FLEX SUPPORT'] }
 ]
@@ -216,7 +217,7 @@ defineExpose({
           <div class="flex mb-8" style="padding-left: 288px; border: none;">
             <div v-for="role in roles.filter(r => !r.toLowerCase().includes('hybrid'))" :key="role"
                  class="text-center flex items-end role-header"
-                 :style="{ color: '#e5e5e5', flex: role.includes('TANK') ? 'none' : '1', width: role.includes('TANK') ? '230px' : 'auto' }">
+                 :style="{ color: '#e5e5e5', flex: role.includes('TANK') ? 'none' : '1', width: role.includes('TANK') ? '272px' : 'auto' }">
               <div
                 class="text-3xl flex justify-center gap-0 text-wrap flex-nowrap items-center">
                 <img v-if="role.includes('TANK')" :src="TankIcon" alt="Tank"
@@ -270,7 +271,7 @@ defineExpose({
                           :alt="hero.name" 
                           crossorigin="anonymous" 
                           class="important-border" 
-                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          style="width: 62px; height: 62px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
                           :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
                               ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
                               : '1' 
@@ -289,7 +290,7 @@ defineExpose({
                           :alt="hero.name" 
                           crossorigin="anonymous" 
                           class="important-border" 
-                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          style="width: 62px; height: 62px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
                           :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
                               ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
                               : '1' 
@@ -308,7 +309,7 @@ defineExpose({
                           :alt="hero.name" 
                           crossorigin="anonymous" 
                           class="important-border" 
-                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          style="width: 62px; height: 62px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
                           :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
                               ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
                               : '1' 
@@ -328,7 +329,7 @@ defineExpose({
                           :alt="hero.name" 
                           crossorigin="anonymous" 
                           class="important-border" 
-                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          style="width: 62px; height: 62px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
                           :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
                               ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
                               : '1' 
@@ -350,7 +351,7 @@ defineExpose({
                           :alt="hero.name" 
                           crossorigin="anonymous" 
                           class="important-border" 
-                          style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
+                          style="width: 62px; height: 62px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.75);" 
                           :style="{ opacity: (player.mainHeroKeys && player.mainHeroKeys.length > 0) 
                               ? (player.mainHeroKeys.includes(hero.key) ? '1' : '0.5') 
                               : '1' 
@@ -369,9 +370,8 @@ defineExpose({
           </div>
         </div>
 
-        <!-- Canvas Disclaimer -->
         <div class="w-full text-center mt-6 mb-4 px-12 opacity-20">
-          <p class="text-[11px] leading-tight tracking-wider" style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance;">
+          <p class="allow-wrap text-[11px] leading-tight tracking-wider" style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance; white-space: normal;">
             Overwatch und alle zugehörigen Grafiken sind Eigentum von Blizzard Entertainment. Keine offizielle Partnerschaft.
           </p>
         </div>

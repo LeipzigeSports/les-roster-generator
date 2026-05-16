@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import LolSettingsPanel from '../components/LolSettingsPanel.vue'
-import LolHeroPool from '../components/LolHeroPool.vue'
-import LolRosterTable from '../components/LolRosterTable.vue'
-import LolExportCanvas from '../components/LolExportCanvas.vue'
+import R6SettingsPanel from '../components/R6SettingsPanel.vue'
+import R6OperatorPool from '../components/R6OperatorPool.vue'
+import R6RosterTable from '../components/R6RosterTable.vue'
+import R6ExportCanvas from '../components/R6ExportCanvas.vue'
 import HelpButton from '../components/HelpButton.vue'
 import SaveManagerModal from '../components/SaveManagerModal.vue'
-import { useChampions } from '../composables/useChampions'
-import { useLolRoster } from '../composables/useLolRoster'
-import type { Hero } from '../types/hero'
+import { useR6Operators } from '../composables/useR6Operators'
+import { useR6Roster } from '../composables/useR6Roster'
+import type { R6Operator } from '../types/r6operator'
 import LogoIcon from '@/assets/icons/LES_ICON-ORANGE.png'
+import R6Logo from '@/assets/icons/R6_LOGO.svg'
 import { useToast } from '../composables/useToast'
 
 const router = useRouter()
@@ -20,19 +21,18 @@ const generatingImage = ref(false)
 const copyingImage = ref(false)
 const showSaveManager = ref(false)
 
-const { champions, loading, currentVersion } = useChampions()
+const { loading, operators } = useR6Operators()
 const {
   teamName,
   date,
   isTransparentBg,
-  roles,
   players,
   addPlayer,
   removePlayer,
   movePlayer,
-  dropHero,
-  removeHero,
-  toggleMainHero,
+  addOperator,
+  removeOperator,
+  toggleMainOperator,
   resetRoster,
   exportData,
   importData,
@@ -42,19 +42,19 @@ const {
   saveTeam,
   loadTeam,
   deleteTeam
-} = useLolRoster()
+} = useR6Roster()
 
-const draggedHero = ref<Hero | null>(null)
-const exportCanvasRef = ref<InstanceType<typeof LolExportCanvas> | null>(null)
+const draggedOperator = ref<R6Operator | null>(null)
+const exportCanvasRef = ref<InstanceType<typeof R6ExportCanvas> | null>(null)
 
-const startDrag = (hero: Hero): void => {
-  draggedHero.value = hero
+const startDrag = (operator: R6Operator): void => {
+  draggedOperator.value = operator
 }
 
-const handleDrop = (playerIndex: number, role: string): void => {
-  if (draggedHero.value) {
-    dropHero(playerIndex, role, draggedHero.value)
-    draggedHero.value = null
+const handleDrop = (playerIndex: number): void => {
+  if (draggedOperator.value) {
+    addOperator(playerIndex, draggedOperator.value)
+    draggedOperator.value = null
   }
 }
 
@@ -66,7 +66,6 @@ onMounted(() => {
       const decoded = decodeURIComponent(escape(window.atob(dataParam)))
       importDataFromString(decoded)
       addToast('Team aus Link geladen!', 'success')
-      // remove query param without reloading
       window.history.replaceState({}, document.title, window.location.pathname)
     } catch (e) {
       console.error(e)
@@ -91,7 +90,7 @@ const handleImport = async (event: Event) => {
     } catch (e) {
       addToast('Fehler beim Importieren der Daten.', 'error')
     }
-    target.value = '' // Reset input
+    target.value = ''
   }
 }
 
@@ -115,29 +114,21 @@ const handleDeleteTeam = (id: string) => {
 
 const validateRoster = (): boolean => {
   let warnings: string[] = []
-  
   if (teamName.value === 'Team Name' || teamName.value.trim() === '') {
     warnings.push('- Team Name ist noch auf dem Standardwert oder leer.')
   }
-  
-  const playersWithNoHeroes = players.value.some(p => {
-    return Object.values(p.heroes).every(hList => hList.length === 0)
-  })
-  
-  if (playersWithNoHeroes) {
-    warnings.push('- Mindestens ein Spieler hat noch keine Champions zugewiesen.')
+  const playersWithNoOps = players.value.some(p => p.operators.length === 0)
+  if (playersWithNoOps) {
+    warnings.push('- Mindestens ein Spieler hat noch keine Operator zugewiesen.')
   }
-  
   if (warnings.length > 0) {
     return window.confirm(`Achtung:\n${warnings.join('\n')}\n\nWillst du trotzdem fortfahren?`)
   }
-  
   return true
 }
 
 const downloadImage = async (): Promise<void> => {
   if (!validateRoster()) return
-  
   generatingImage.value = true
   if (exportCanvasRef.value) {
     await exportCanvasRef.value.downloadImage()
@@ -147,7 +138,6 @@ const downloadImage = async (): Promise<void> => {
 
 const copyImage = async (): Promise<void> => {
   if (!validateRoster()) return
-  
   copyingImage.value = true
   if (exportCanvasRef.value) {
     await exportCanvasRef.value.copyImage()
@@ -172,7 +162,7 @@ const handleReset = () => {
         <div class="flex items-center gap-4">
           <img :src="LogoIcon" alt="LES Logo" class="w-32 h-32 -ml-2 -mb-1" />
           <h1 class="text-5xl bold" style="color: #e5e5e5; line-height: 1.1">
-            LES Roster Generator <br>for League of Legends
+            LES Roster Generator <br>for Rainbow Six Siege
           </h1>
         </div>
         <div class="flex items-center gap-3">
@@ -182,7 +172,7 @@ const handleReset = () => {
         </div>
       </div>
 
-      <LolSettingsPanel 
+      <R6SettingsPanel 
         v-model:teamName="teamName" 
         v-model:date="date" 
         v-model:isTransparentBg="isTransparentBg" 
@@ -191,23 +181,21 @@ const handleReset = () => {
         @reset="handleReset"
       />
 
-      <LolHeroPool
-        :champions="champions"
+      <R6OperatorPool
         :loading="loading"
         @start-drag="startDrag"
       />
 
-      <LolRosterTable
+      <R6RosterTable
         :players="players"
-        :roles="roles"
-        :champions="champions"
+        :operators="operators"
         @add-player="addPlayer"
         @remove-player="removePlayer"
         @move-player="movePlayer"
-        @drop-hero="handleDrop"
-        @add-hero-obj="dropHero"
-        @remove-hero="removeHero"
-        @toggle-main-hero="toggleMainHero"
+        @drop-operator="handleDrop"
+        @add-operator-obj="addOperator"
+        @remove-operator="removeOperator"
+        @toggle-main-operator="toggleMainOperator"
       />
 
       <div class="flex justify-center mb-8 gap-6">
@@ -224,10 +212,7 @@ const handleReset = () => {
           </svg>
           <h3 class="bold" v-if="!generatingImage">Grafik speichern</h3>
           <span v-if="generatingImage" class="flex gap-2 items-center">
-            <svg
-              class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"
-              viewBox="0 0 24 24"
-            ></svg>
+            <svg class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" viewBox="0 0 24 24"></svg>
             <h3 class="bold">Speichern...</h3>
           </span>
         </button>
@@ -244,10 +229,7 @@ const handleReset = () => {
           </svg>
           <h3 class="bold" v-if="!copyingImage">Grafik kopieren</h3>
           <span v-if="copyingImage" class="flex gap-2 items-center">
-            <svg
-              class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full"
-              viewBox="0 0 24 24"
-            ></svg>
+            <svg class="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" viewBox="0 0 24 24"></svg>
             <h3 class="bold">Kopieren...</h3>
           </span>
         </button>
@@ -255,18 +237,17 @@ const handleReset = () => {
 
     </div>
 
-    <LolExportCanvas
+    <R6ExportCanvas
       ref="exportCanvasRef"
       :team-name="teamName"
       :date="date"
-      :roles="roles"
       :players="players"
       :is-transparent-bg="isTransparentBg"
     />
 
     <div class="w-full text-center mt-12 mb-8 px-4 border-t border-white/5 pt-8">
       <p class="text-[12px] opacity-20 leading-tight tracking-widest" style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance;">
-        Der LES Roster Generator wird nicht von Riot Games unterstützt und spiegelt nicht die Ansichten oder Meinungen von Riot Games oder anderen Personen wider, die offiziell an der Herstellung oder Verwaltung von Riot Games-Eigenschaften beteiligt sind. Riot Games und alle zugehörigen Eigenschaften sind Marken oder eingetragene Marken von Riot Games, Inc.
+        Tom Clancy's Rainbow Six Siege ist eine Marke von Ubisoft Entertainment. Alle Operator-Icons und Assets sind Eigentum ihrer jeweiligen Inhaber. Dieses Tool steht in keiner Verbindung zu Ubisoft.
       </p>
     </div>
 

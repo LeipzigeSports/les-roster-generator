@@ -1,0 +1,105 @@
+import { ref, computed } from 'vue'
+import type { R6Operator } from '../types/r6operator'
+
+export function useR6Operators() {
+  const loading = ref(false)
+  
+  const operators = ref<R6Operator[]>([
+    { id: 'ace', name: 'Ace', role: 'Attacker' },
+    { id: 'alibi', name: 'Alibi', role: 'Defender' },
+    { id: 'amaru', name: 'Amaru', role: 'Attacker' },
+    { id: 'aruni', name: 'Aruni', role: 'Defender' },
+    { id: 'ash', name: 'Ash', role: 'Attacker' },
+    { id: 'azami', name: 'Azami', role: 'Defender' },
+    { id: 'bandit', name: 'Bandit', role: 'Defender' },
+    { id: 'blackbeard', name: 'Blackbeard', role: 'Attacker' },
+    { id: 'blitz', name: 'Blitz', role: 'Attacker' },
+    { id: 'brava', name: 'Brava', role: 'Attacker' },
+    { id: 'buck', name: 'Buck', role: 'Attacker' },
+    { id: 'capitao', name: 'Capitão', role: 'Attacker' },
+    { id: 'castle', name: 'Castle', role: 'Defender' },
+    { id: 'caveira', name: 'Caveira', role: 'Defender' },
+    { id: 'clash', name: 'Clash', role: 'Defender' },
+    { id: 'deimos', name: 'Deimos', role: 'Attacker' },
+    { id: 'denari', name: 'Denari', role: 'Defender' },
+    { id: 'doc', name: 'Doc', role: 'Defender' },
+    { id: 'dokkaebi', name: 'Dokkaebi', role: 'Attacker' },
+    { id: 'echo', name: 'Echo', role: 'Defender' },
+    { id: 'ela', name: 'Ela', role: 'Defender' },
+    { id: 'fenrir', name: 'Fenrir', role: 'Defender' },
+    { id: 'finka', name: 'Finka', role: 'Attacker' },
+    { id: 'flores', name: 'Flores', role: 'Attacker' },
+    { id: 'frost', name: 'Frost', role: 'Defender' },
+    { id: 'fuze', name: 'Fuze', role: 'Attacker' },
+    { id: 'glaz', name: 'Glaz', role: 'Attacker' },
+    { id: 'goyo', name: 'Goyo', role: 'Defender' },
+    { id: 'gridlock', name: 'Gridlock', role: 'Attacker' },
+    { id: 'grim', name: 'Grim', role: 'Attacker' },
+    { id: 'hibana', name: 'Hibana', role: 'Attacker' },
+    { id: 'iana', name: 'Iana', role: 'Attacker' },
+    { id: 'iq', name: 'IQ', role: 'Attacker' },
+    { id: 'jackal', name: 'Jackal', role: 'Attacker' },
+    { id: 'jager', name: 'Jäger', role: 'Defender' },
+    { id: 'kaid', name: 'Kaid', role: 'Defender' },
+    { id: 'kali', name: 'Kali', role: 'Attacker' },
+    { id: 'kapkan', name: 'Kapkan', role: 'Defender' },
+    { id: 'lesion', name: 'Lesion', role: 'Defender' },
+    { id: 'lion', name: 'Lion', role: 'Attacker' },
+    { id: 'maestro', name: 'Maestro', role: 'Defender' },
+    { id: 'maverick', name: 'Maverick', role: 'Attacker' },
+    { id: 'melusi', name: 'Melusi', role: 'Defender' },
+    { id: 'mira', name: 'Mira', role: 'Defender' },
+    { id: 'montagne', name: 'Montagne', role: 'Attacker' },
+    { id: 'mozzie', name: 'Mozzie', role: 'Defender' },
+    { id: 'mute', name: 'Mute', role: 'Defender' },
+    { id: 'nokk', name: 'Nøkk', role: 'Attacker' },
+    { id: 'nomad', name: 'Nomad', role: 'Attacker' },
+    { id: 'oryx', name: 'Oryx', role: 'Defender' },
+    { id: 'osa', name: 'Osa', role: 'Attacker' },
+    { id: 'pulse', name: 'Pulse', role: 'Defender' },
+    { id: 'ram', name: 'Ram', role: 'Attacker' },
+    { id: 'rauora', name: 'Rauora', role: 'Defender' },
+    { id: 'rook', name: 'Rook', role: 'Defender' },
+    { id: 'sens', name: 'Sens', role: 'Attacker' },
+    { id: 'sentry', name: 'Sentry', role: 'Defender' },
+    { id: 'skopos', name: 'Skopós', role: 'Defender' },
+    { id: 'sledge', name: 'Sledge', role: 'Attacker' },
+    { id: 'smoke', name: 'Smoke', role: 'Defender' },
+    { id: 'solis', name: 'Solis', role: 'Defender' },
+    { id: 'striker', name: 'Striker', role: 'Attacker' },
+    { id: 'tachanka', name: 'Tachanka', role: 'Defender' },
+    { id: 'thatcher', name: 'Thatcher', role: 'Attacker' },
+    { id: 'thermite', name: 'Thermite', role: 'Attacker' },
+    { id: 'thorn', name: 'Thorn', role: 'Defender' },
+    { id: 'thunderbird', name: 'Thunderbird', role: 'Defender' },
+    { id: 'tubarao', name: 'Tubarão', role: 'Defender' },
+    { id: 'twitch', name: 'Twitch', role: 'Attacker' },
+    { id: 'valkyrie', name: 'Valkyrie', role: 'Defender' },
+    { id: 'vigil', name: 'Vigil', role: 'Defender' },
+    { id: 'wamai', name: 'Wamai', role: 'Defender' },
+    { id: 'warden', name: 'Warden', role: 'Defender' },
+    { id: 'ying', name: 'Ying', role: 'Attacker' },
+    { id: 'zero', name: 'Zero', role: 'Attacker' },
+    { id: 'zofia', name: 'Zofia', role: 'Attacker' },
+    { id: 'recruit_blue', name: 'Recruit Blue', role: 'Recruit' },
+    { id: 'recruit_green', name: 'Recruit Green', role: 'Recruit' },
+    { id: 'recruit_orange', name: 'Recruit Orange', role: 'Recruit' },
+    { id: 'recruit_red', name: 'Recruit Red', role: 'Recruit' },
+    { id: 'recruit_yellow', name: 'Recruit Yellow', role: 'Recruit' },
+  ])
+
+  const attackers = computed(() => operators.value.filter(op => op.role === 'Attacker' || op.role === 'Recruit'))
+  const defenders = computed(() => operators.value.filter(op => op.role === 'Defender' || op.role === 'Recruit'))
+
+  const getOperatorIcon = (id: string) => {
+    return `https://cdn.jsdelivr.net/gh/marcopixel/r6operators@master/operators/${id}/${id}.svg`
+  }
+
+  return {
+    operators,
+    attackers,
+    defenders,
+    loading,
+    getOperatorIcon
+  }
+}

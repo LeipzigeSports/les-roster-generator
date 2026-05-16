@@ -1,5 +1,5 @@
 import { ref, watch, type Ref } from 'vue'
-import type { Player, Hero } from '../types/hero'
+import type { R6Player, R6Operator } from '../types/r6operator'
 
 export interface SavedTeam {
   id: string;
@@ -8,20 +8,18 @@ export interface SavedTeam {
   data: any;
 }
 
-interface UseRosterReturn {
+interface UseR6RosterReturn {
   teamName: Ref<string>
   date: Ref<string>
   isTransparentBg: Ref<boolean>
-  roles: Ref<string[]>
-  players: Ref<Player[]>
+  players: Ref<R6Player[]>
   addPlayer: () => void
   removePlayer: (index: number) => void
   movePlayer: (fromIndex: number, toIndex: number) => void
-  dropHero: (playerIndex: number, role: string, hero: Hero) => void
-  removeHero: (playerIndex: number, role: string, heroIndex: number) => void
-  toggleMainHero: (playerIndex: number, heroKey: string) => void
+  addOperator: (playerIndex: number, operator: R6Operator) => void
+  removeOperator: (playerIndex: number, opIndex: number) => void
+  toggleMainOperator: (playerIndex: number, opId: string) => void
   resetRoster: () => void
-  isClassicLayout: Ref<boolean>
   exportData: () => void
   importData: (file: File) => Promise<void>
   importDataFromString: (jsonString: string) => void
@@ -32,10 +30,9 @@ interface UseRosterReturn {
   deleteTeam: (id: string) => void
 }
 
-export function useRoster(): UseRosterReturn {
-  const CACHE_KEY = 'les_roster_data'
+export function useR6Roster(): UseR6RosterReturn {
+  const CACHE_KEY = 'les_r6_roster_data'
 
-  // Load from localStorage if available
   const savedData = localStorage.getItem(CACHE_KEY)
   const initialData = savedData ? JSON.parse(savedData) : null
 
@@ -45,45 +42,30 @@ export function useRoster(): UseRosterReturn {
   const teamName = ref<string>(initialData?.teamName || 'Team Name')
   const date = ref<string>(defaultDate)
   const isTransparentBg = ref<boolean>(initialData?.isTransparentBg || false)
-  const isClassicLayout = ref<boolean>(initialData?.isClassicLayout || false)
   
-  const roles = ref<string[]>([
-    'TANK',
-    'HITSCAN DPS',
-    'HYBRID DPS',
-    'FLEX DPS',
-    'MAIN SUPPORT',
-    'HYBRID SUPPORT',
-    'FLEX SUPPORT'
-  ])
-
-  const defaultPlayers: Player[] = [
-    { id: 'p1', name: 'Spieler1', status: '', heroes: {} },
-    { id: 'p2', name: 'Spieler2', status: '', heroes: {} },
-    { id: 'p3', name: 'Spieler3', status: '', heroes: {} },
-    { id: 'p4', name: 'Spieler4', status: '', heroes: {} },
-    { id: 'p5', name: 'Spieler5', status: '', heroes: {} }
+  const defaultPlayers: R6Player[] = [
+    { id: 'p1', name: 'Spieler1', status: '', operators: [] },
+    { id: 'p2', name: 'Spieler2', status: '', operators: [] },
+    { id: 'p3', name: 'Spieler3', status: '', operators: [] },
+    { id: 'p4', name: 'Spieler4', status: '', operators: [] },
+    { id: 'p5', name: 'Spieler5', status: '', operators: [] }
   ]
 
-  const loadedPlayers: Player[] = initialData?.players || JSON.parse(JSON.stringify(defaultPlayers))
-  // Ensure every player has a unique id (for existing saves without IDs)
+  const loadedPlayers: R6Player[] = initialData?.players || JSON.parse(JSON.stringify(defaultPlayers))
   loadedPlayers.forEach(p => {
     if (!p.id) p.id = Math.random().toString(36).substring(2, 9)
   })
 
-  const players = ref<Player[]>(loadedPlayers)
+  const players = ref<R6Player[]>(loadedPlayers)
 
-  // Load Saved Teams
   const savedTeams = ref<SavedTeam[]>([])
   const loadedSavedTeams = localStorage.getItem(`${CACHE_KEY}_saved_teams`)
   if (loadedSavedTeams) {
     savedTeams.value = JSON.parse(loadedSavedTeams)
   }
 
-  // Auto-save watch
-
   watch(
-    [teamName, date, isTransparentBg, isClassicLayout, players],
+    [teamName, date, isTransparentBg, players],
     () => {
       localStorage.setItem(
         CACHE_KEY,
@@ -91,7 +73,6 @@ export function useRoster(): UseRosterReturn {
           teamName: teamName.value,
           date: date.value,
           isTransparentBg: isTransparentBg.value,
-          isClassicLayout: isClassicLayout.value,
           players: players.value,
         })
       )
@@ -111,7 +92,7 @@ export function useRoster(): UseRosterReturn {
       id: Math.random().toString(36).substring(2, 9),
       name: `Spieler${players.value.length + 1}`,
       status: '',
-      heroes: {}
+      operators: []
     })
   }
 
@@ -124,45 +105,34 @@ export function useRoster(): UseRosterReturn {
     players.value.splice(toIndex, 0, player!)
   }
 
-  const dropHero = (playerIndex: number, role: string, hero: Hero): void => {
-    if (!hero) return
-
-    if (!players.value[playerIndex]!.heroes[role]) {
-      players.value[playerIndex]!.heroes[role] = []
-    }
-
-    if (players.value[playerIndex]!.heroes[role]!.some(h => h.key === hero.key)) {
-      return
-    }
-    if (!role.includes("HYBRID")) {
-      const max = role.includes("TANK") ? 4 : 3
-      if (players.value[playerIndex]!.heroes[role].length < max) {
-        players.value[playerIndex]!.heroes[role].push(hero)
-      }
-    } else {
-      if (players.value[playerIndex]!.heroes[role].length < 2) {
-        players.value[playerIndex]!.heroes[role].push(hero)
+  const addOperator = (playerIndex: number, operator: R6Operator): void => {
+    if (!operator || !players.value[playerIndex]) return
+    if (players.value[playerIndex]!.operators.length < 4) {
+      if (!players.value[playerIndex]!.operators.some(op => op.id === operator.id)) {
+        players.value[playerIndex]!.operators.push(operator)
       }
     }
   }
 
-  const removeHero = (playerIndex: number, role: string, heroIndex: number): void => {
-    players.value[playerIndex]!.heroes[role]!.splice(heroIndex, 1)
+  const removeOperator = (playerIndex: number, opIndex: number): void => {
+    if (players.value[playerIndex]) {
+      const op = players.value[playerIndex]!.operators[opIndex]
+      if (op && (players.value[playerIndex] as any).mainOpKeys) {
+        (players.value[playerIndex] as any).mainOpKeys = (players.value[playerIndex] as any).mainOpKeys.filter((k: string) => k !== op.id)
+      }
+      players.value[playerIndex]!.operators.splice(opIndex, 1)
+    }
   }
 
-  const toggleMainHero = (playerIndex: number, heroKey: string): void => {
+  const toggleMainOperator = (playerIndex: number, opId: string) => {
     const player = players.value[playerIndex]
     if (!player) return
-
-    if (!player.mainHeroKeys) {
-      player.mainHeroKeys = []
-    }
-
-    const index = player.mainHeroKeys.indexOf(heroKey)
-    if (index > -1) {
-      player.mainHeroKeys.splice(index, 1)
+    
+    const currentKeys = player.mainOpKeys || []
+    if (currentKeys.includes(opId)) {
+      player.mainOpKeys = currentKeys.filter(k => k !== opId)
     } else {
-      player.mainHeroKeys.push(heroKey)
+      player.mainOpKeys = [...currentKeys, opId]
     }
   }
 
@@ -171,13 +141,12 @@ export function useRoster(): UseRosterReturn {
       teamName: teamName.value,
       date: date.value,
       isTransparentBg: isTransparentBg.value,
-      isClassicLayout: isClassicLayout.value,
       players: players.value,
     }
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data))
     const downloadAnchorNode = document.createElement('a')
     downloadAnchorNode.setAttribute("href", dataStr)
-    downloadAnchorNode.setAttribute("download", `${teamName.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_ow_roster.json`)
+    downloadAnchorNode.setAttribute("download", `${teamName.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_r6_roster.json`)
     document.body.appendChild(downloadAnchorNode)
     downloadAnchorNode.click()
     downloadAnchorNode.remove()
@@ -189,7 +158,6 @@ export function useRoster(): UseRosterReturn {
       if (data.teamName !== undefined) teamName.value = data.teamName
       if (data.date !== undefined) date.value = data.date
       if (data.isTransparentBg !== undefined) isTransparentBg.value = data.isTransparentBg
-      if (data.isClassicLayout !== undefined) isClassicLayout.value = data.isClassicLayout
       if (data.players !== undefined) players.value = data.players
     } catch (e) {
       console.error("Fehler beim Importieren der Daten:", e)
@@ -212,11 +180,9 @@ export function useRoster(): UseRosterReturn {
       teamName: teamName.value,
       date: date.value,
       isTransparentBg: isTransparentBg.value,
-      isClassicLayout: isClassicLayout.value,
       players: players.value,
     }
     const jsonStr = JSON.stringify(data)
-    // UTF-8 safe base64 encoding
     const base64 = window.btoa(unescape(encodeURIComponent(jsonStr)))
     return `${window.location.origin}${window.location.pathname}?data=${base64}`
   }
@@ -226,7 +192,6 @@ export function useRoster(): UseRosterReturn {
       teamName: teamName.value,
       date: date.value,
       isTransparentBg: isTransparentBg.value,
-      isClassicLayout: isClassicLayout.value,
       players: players.value,
     }
     const newSave: SavedTeam = {
@@ -246,7 +211,6 @@ export function useRoster(): UseRosterReturn {
     if (data.teamName !== undefined) teamName.value = data.teamName
     if (data.date !== undefined) date.value = data.date
     if (data.isTransparentBg !== undefined) isTransparentBg.value = data.isTransparentBg
-    if (data.isClassicLayout !== undefined) isClassicLayout.value = data.isClassicLayout
     if (data.players !== undefined) players.value = data.players
   }
 
@@ -259,16 +223,14 @@ export function useRoster(): UseRosterReturn {
     teamName,
     date,
     isTransparentBg,
-    roles,
     players,
     addPlayer,
     removePlayer,
     movePlayer,
-    dropHero,
-    removeHero,
-    toggleMainHero,
+    addOperator,
+    removeOperator,
+    toggleMainOperator,
     resetRoster,
-    isClassicLayout,
     exportData,
     importData,
     importDataFromString,
