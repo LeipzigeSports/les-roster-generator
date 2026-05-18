@@ -43,12 +43,12 @@ const showHelp = ref(false)
                 <span class="text-2xl bold text-[#ff6700]">2</span>
               </div>
               <div class="flex-grow">
-                <h3 class="bold text-xl mb-1" style="color: #e5e5e5">Helden zuweisen</h3>
+                <h3 class="bold text-xl mb-1" style="color: #e5e5e5">Charaktere zuweisen</h3>
                 <p class="opacity-70">Nutze <strong>Drag & Drop</strong> aus dem Pool oben oder klicke auf das 
                   <span class="inline-flex items-center justify-center px-1 py-1 bg-white/5 rounded border border-white/10 align-middle -mt-1 mr-1">
                     <span class="text-lg" style="color: #e5e5e5; line-height: 1; font-family: 'Geom Graphic W03 Bold Italic', sans-serif; font-size: 1.1rem;">+</span>
                   </span>
-                  <strong>Plus</strong> in einer Tabellenzelle, um Helden hinzuzufügen. Ein Klick auf ein bereits zugewiesenes Bild entfernt dieses wieder.
+                  <strong>Plus</strong> in einer Tabellenzelle, um Charaktere hinzuzufügen. Ein Klick auf ein bereits zugewiesenes Bild entfernt dieses wieder.
                 </p>
               </div>
             </div>

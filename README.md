@@ -1,6 +1,6 @@
 # LES Roster Generator
 
-A web app for building, customizing, and exporting team rosters for different games. Drag and drop heroes into player slots, manage hero pools, and export your roster as an image for sharing.
+A web app for building, customizing, and exporting team rosters for different games. Drag and drop characters into player slots, manage character pools, and export your roster as an image for sharing.
 
 > [!NOTE]
 > This repository is a fork of [@the-eventhorizon](https://github.com/the-eventhorizon)'s great work: [Overwatch Roster Generator](https://github.com/the-eventhorizon/ow-roster-generator)
@@ -22,7 +22,8 @@ A web app for building, customizing, and exporting team rosters for different ga
 ## Demo
 <img src="demo/readme_demo1.png" alt="App Screenshot" height="600">
 <img src="demo/readme_demo_ow.png" alt="App Screenshot" height="600">
-<img src="demo/readme_demo_lol.png" alt="App Screenshot" height="600">
+
+Find more images in the demo [directory](https://github.com/LeipzigeSports/les-roster-generator/tree/master/demo).
 
 ## Getting Started
 
@@ -75,6 +76,7 @@ npm run lint
 ## Credits
 - Hero portraits and Overwatch assets © Blizzard Entertainment (used under fair use for fan projects)
 - Champion portraits and League of Legends assets © Riot Games (provided via Data Dragon under Riot Games' Legal Jibber Jabber policy)
+- Operator icons and Rainbow Six Siege assets © Ubisoft Entertainment (used under fair use for fan projects)
 - Fonts: EuroStyle, Geom (see `src/assets/fonts/`) are from Web Fonts(http://www.onlinewebfonts.com) and are licensed by CC BY 4.0</div>
 
 
@@ -82,11 +84,12 @@ npm run lint
 Pull requests and suggestions welcome! Please open an issue for major changes.
 
 ## License
-This tool is a fan-made utility and is not affiliated with or endorsed by Blizzard or Riot Games.
+This tool is a fan-made utility and is not affiliated with or endorsed by Blizzard, Riot Games, or Ubisoft.
 The code is licensed under the GNU General Public License v3.0 (GPLv3).
-Blizzard- and Riot Games-owned assets are not included or covered by this license.
+Blizzard-, Riot Games-, and Ubisoft-owned assets are not included or covered by this license.
 Hero portraits and other artwork are © Blizzard Entertainment.
 League of Legends assets and character data are © Riot Games, Inc.
+Tom Clancy's Rainbow Six Siege assets and operator icons are © Ubisoft Entertainment.
 
 
 ## Acknowledgements

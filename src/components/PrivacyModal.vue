@@ -30,7 +30,8 @@ const emit = defineEmits(['close'])
             <li><strong>Overfast API:</strong> Zum Abruf aktueller Overwatch-Helden-Informationen und Spieldaten.</li>
             <li><strong>Blizzard Entertainment, Inc.:</strong> Zum Laden der offiziellen Overwatch-Helden-Porträts und Rollen-Icons.</li>
             <li><strong>Riot Games (Data Dragon API):</strong> Zum Abruf von League of Legends Champion-Informationen und Porträts.</li>
-            <li><strong>Images.weserv.nl:</strong> Dieser Bild-Proxy wird genutzt, um die externen Grafiken (Overwatch & LoL) technisch für den lokalen Download als PNG-Datei aufzubereiten.</li>
+            <li><strong>Rainbow Six Siege Assets (r6operators):</strong> Zum Abruf von Operator-Icons über das Open-Source-Projekt r6operators (gehostet auf JSDelivr/GitHub).</li>
+            <li><strong>Images.weserv.nl:</strong> Dieser Bild-Proxy wird genutzt, um die externen Grafiken (Overwatch, LoL & R6) technisch für den lokalen Download als PNG-Datei aufzubereiten.</li>
           </ul>
           <p class="mt-4 italic" style="opacity: 0.8">Rechtsgrundlage: Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer funktionalen und ansprechenden Bereitstellung unseres Community-Angebots gemäß Art. 6 Abs. 1 lit. f DSGVO.</p>
         </section>
@@ -52,7 +53,7 @@ const emit = defineEmits(['close'])
 
         <section class="border-t border-white/10 pt-6">
           <h3 class="bold text-xl mb-3" style="color: #ff6700">6. Ergänzende Hinweise</h3>
-          <p>Dieses Tool ist ein inoffizielles Community-Projekt. Overwatch und alle zugehörigen Assets sind Eigentum von Blizzard Entertainment. League of Legends und alle zugehörigen Assets sind Eigentum von Riot Games. Für die allgemeine Datenverarbeitung des Vereins gilt zudem die Datenschutzerklärung unserer Hauptseite: <a href="https://leipzigesports.de/datenschutz" target="_blank" class="hover:underline" style="color: #ff6700">leipzigesports.de/datenschutz</a>.</p>
+          <p>Dieses Tool ist ein inoffizielles Community-Projekt. Overwatch und alle zugehörigen Assets sind Eigentum von Blizzard Entertainment. League of Legends und alle zugehörigen Assets sind Eigentum von Riot Games. Tom Clancy's Rainbow Six Siege und alle zugehörigen Assets sind Eigentum von Ubisoft Entertainment. Für die allgemeine Datenverarbeitung des Vereins gilt zudem die Datenschutzerklärung unserer Hauptseite: <a href="https://leipzigesports.de/datenschutz" target="_blank" class="hover:underline" style="color: #ff6700">leipzigesports.de/datenschutz</a>.</p>
         </section>
       </div>
 

@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import SettingsPanel from '../components/SettingsPanel.vue'
 import HeroPool from '../components/HeroPool.vue'
 import RosterTable from '../components/RosterTable.vue'
 import ExportCanvas from '../components/ExportCanvas.vue'
 import HelpButton from '../components/HelpButton.vue'
+import SaveManagerModal from '../components/SaveManagerModal.vue'
 import { useHeroes } from '../composables/useHeroes'
 import { useRoster } from '../composables/useRoster'
 import type { Hero } from '../types/hero'
 import LogoIcon from '@/assets/icons/LES_ICON-ORANGE.png'
 import { useRouter } from 'vue-router'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
+const { addToast } = useToast()
 
 const generatingImage = ref(false)
 const copyingImage = ref(false)
+const showSaveManager = ref(false)
 
 const { loading, heroesByRole } = useHeroes()
 const {
@@ -30,7 +34,15 @@ const {
   dropHero,
   removeHero,
   toggleMainHero,
-  resetRoster
+  resetRoster,
+  exportData,
+  importData,
+  importDataFromString,
+  getShareLink,
+  savedTeams,
+  saveTeam,
+  loadTeam,
+  deleteTeam
 } = useRoster()
 
 const draggedHero = ref<Hero | null>(null)
@@ -44,6 +56,61 @@ const handleDrop = (playerIndex: number, role: string): void => {
   if (draggedHero.value) {
     dropHero(playerIndex, role, draggedHero.value)
     draggedHero.value = null
+  }
+}
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  const dataParam = urlParams.get('data')
+  if (dataParam) {
+    try {
+      const decoded = decodeURIComponent(escape(window.atob(dataParam)))
+      importDataFromString(decoded)
+      addToast('Team aus Link geladen!', 'success')
+      // remove query param without reloading
+      window.history.replaceState({}, document.title, window.location.pathname)
+    } catch (e) {
+      console.error(e)
+      addToast('Fehler beim Laden des Links', 'error')
+    }
+  }
+})
+
+const handleShare = () => {
+  const link = getShareLink()
+  navigator.clipboard.writeText(link)
+    .then(() => addToast('Link in die Zwischenablage kopiert!', 'success'))
+    .catch(() => addToast('Fehler beim Kopieren des Links', 'error'))
+}
+
+const handleImport = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    try {
+      await importData(target.files[0]!)
+      addToast('Daten erfolgreich importiert!', 'success')
+    } catch (e) {
+      addToast('Fehler beim Importieren der Daten.', 'error')
+    }
+    target.value = '' // Reset input
+  }
+}
+
+const handleSaveTeam = (name: string) => {
+  saveTeam(name)
+  addToast(`Team "${name}" gespeichert!`, 'success')
+}
+
+const handleLoadTeam = (id: string) => {
+  loadTeam(id)
+  showSaveManager.value = false
+  addToast('Team geladen!', 'success')
+}
+
+const handleDeleteTeam = (id: string) => {
+  if (window.confirm('Möchtest du diesen Speicherstand wirklich löschen?')) {
+    deleteTeam(id)
+    addToast('Speicherstand gelöscht.', 'success')
   }
 }
 
@@ -110,12 +177,22 @@ const handleReset = () => {
             LES Roster Generator <br>for Overwatch
           </h1>
         </div>
-        <button @click="router.push('/')" class="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white transition-all uppercase font-bold text-sm tracking-wider cursor-pointer" style="font-family: 'Geom Graphic W03 Bold Italic', sans-serif;">
-            Zurück zur Auswahl
-        </button>
+        <div class="flex items-center gap-3">
+          <button @click="router.push('/')" class="p-4 ml-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white transition-all uppercase font-bold text-sm tracking-wider cursor-pointer" style="font-family: 'Geom Graphic W03 Bold Italic', sans-serif;">
+              Zurück zur Auswahl
+          </button>
+        </div>
       </div>
 
-      <SettingsPanel v-model:teamName="teamName" v-model:date="date" v-model:isTransparentBg="isTransparentBg" v-model:isClassicLayout="isClassicLayout" />
+      <SettingsPanel 
+        v-model:teamName="teamName" 
+        v-model:date="date" 
+        v-model:isTransparentBg="isTransparentBg" 
+        v-model:isClassicLayout="isClassicLayout" 
+        @manage-data="showSaveManager = true"
+        @share="handleShare"
+        @reset="handleReset"
+      />
 
       <HeroPool
         :heroes-by-role="heroesByRole"
@@ -130,7 +207,6 @@ const handleReset = () => {
         @add-player="addPlayer"
         @remove-player="removePlayer"
         @move-player="movePlayer"
-        @reset-roster="handleReset"
         @drop-hero="handleDrop"
         @add-hero-obj="dropHero"
         @remove-hero="removeHero"
@@ -199,5 +275,19 @@ const handleReset = () => {
         Der LES Roster Generator wird nicht von Blizzard Entertainment unterstützt und spiegelt nicht die Ansichten oder Meinungen von Blizzard Entertainment oder anderen Personen wider, die offiziell an der Herstellung oder Verwaltung von Blizzard Entertainment-Eigenschaften beteiligt sind. Overwatch und alle zugehörigen Eigenschaften sind Marken oder eingetragene Marken von Blizzard Entertainment, Inc.
       </p>
     </div>
+
+    <SaveManagerModal 
+      :show="showSaveManager" 
+      :saved-teams="savedTeams" 
+      :current-team-name="teamName"
+      @close="showSaveManager = false"
+      @save="handleSaveTeam"
+      @load="handleLoadTeam"
+      @delete="handleDeleteTeam"
+      @export="exportData"
+      @import="handleImport"
+      @download-image="downloadImage"
+      @copy-image="copyImage"
+    />
   </div>
 </template>

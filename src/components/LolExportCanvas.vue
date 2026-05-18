@@ -48,9 +48,10 @@ const prepareClone = async (): Promise<HTMLElement | null> => {
     const htmlEl = el as HTMLElement
     if (htmlEl.classList.contains('important-border') || htmlEl.classList.contains('role-column')) return
     htmlEl.style.border = 'none'
-    htmlEl.style.outline = 'none'
     htmlEl.style.boxShadow = 'none'
-    htmlEl.style.whiteSpace = 'nowrap'
+    if (!htmlEl.classList.contains('allow-wrap')) {
+      htmlEl.style.whiteSpace = 'nowrap'
+    }
   })
 
   document.body.appendChild(clone)
@@ -245,9 +246,8 @@ defineExpose({
           </div>
         </div>
 
-        <!-- Canvas Disclaimer -->
         <div class="w-full text-center mt-12 mb-4 px-12 opacity-20">
-          <p class="text-[11px] leading-tight tracking-wider" style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance;">
+          <p class="allow-wrap text-[11px] leading-tight tracking-wider" style="color: #e5e5e5; font-family: 'Geom Graphic W03 Regular Italic', sans-serif; text-wrap: balance; white-space: normal;">
             Der LES Roster Generator wird nicht von Riot Games unterstützt und spiegelt nicht die Ansichten oder Meinungen von Riot Games oder anderen Personen wider, die offiziell an der Herstellung oder Verwaltung von Riot Games-Eigenschaften beteiligt sind. Riot Games und alle zugehörigen Eigenschaften sind Marken oder eingetragene Marken von Riot Games, Inc.
           </p>
         </div>

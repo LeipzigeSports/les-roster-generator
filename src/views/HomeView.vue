@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import LogoIcon from '@/assets/icons/LES_ICON-ORANGE.png'
+import R6Logo from '@/assets/icons/R6_LOGO.svg'
 
 const router = useRouter()
 </script>
@@ -15,7 +16,7 @@ const router = useRouter()
       <p class="text-xl mt-4 opacity-50" style="font-family: 'Geom Graphic W03 Regular Italic', sans-serif;">Wähle dein Spiel</p>
     </div>
 
-    <div class="flex gap-8 flex-wrap justify-center max-w-4xl">
+    <div class="flex gap-8 flex-wrap justify-center max-w-6xl">
       <!-- Overwatch Card -->
       <div 
         @click="router.push('/ow')"
@@ -42,10 +43,24 @@ const router = useRouter()
             src="https://cdn.simpleicons.org/leagueoflegends/white" 
             alt="LoL" 
             class="w-30 h-30 opacity-80 group-hover:opacity-100 transition-opacity" 
-            style="filter: brightness(0) invert(1);"
           />
         </div>
         <h2 class="text-3xl bold uppercase text-[#e5e5e5] text-center leading-[0.95]">League of Legends</h2>
+      </div>
+
+      <!-- R6 Card -->
+      <div 
+        @click="router.push('/r6')"
+        class="game-card cursor-pointer group flex flex-col items-center justify-center p-8 rounded-xl border border-white/10 transition-all w-80 h-96 hover:border-[#ff6700]"
+      >
+        <div class="mb-8 p-6 bg-white/5 rounded-full group-hover:scale-110 transition-transform flex items-center justify-center">
+          <img 
+            :src="R6Logo" 
+            alt="R6" 
+            class="w-32 h-32 opacity-90 group-hover:opacity-100 transition-opacity" 
+          />
+        </div>
+        <h2 class="text-3xl bold uppercase text-[#e5e5e5] text-center leading-[0.95]">Rainbow Six Siege</h2>
       </div>
     </div>
   </div>

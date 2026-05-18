@@ -1,6 +1,13 @@
 import { ref, watch, type Ref } from 'vue'
 import type { Hero, Player } from '../types/hero'
 
+export interface SavedTeamLol {
+  id: string;
+  name: string;
+  dateSaved: number;
+  data: any;
+}
+
 interface UseLolRosterReturn {
   teamName: Ref<string>
   date: Ref<string>
@@ -14,6 +21,14 @@ interface UseLolRosterReturn {
   removeHero: (playerIndex: number, role: string, heroIndex: number) => void
   toggleMainHero: (playerIndex: number, heroKey: string) => void
   resetRoster: () => void
+  exportData: () => void
+  importData: (file: File) => Promise<void>
+  importDataFromString: (jsonString: string) => void
+  getShareLink: () => string
+  savedTeams: Ref<SavedTeamLol[]>
+  saveTeam: (name: string) => void
+  loadTeam: (id: string) => void
+  deleteTeam: (id: string) => void
 }
 
 export function useLolRoster(): UseLolRosterReturn {
@@ -52,6 +67,13 @@ export function useLolRoster(): UseLolRosterReturn {
   })
 
   const players = ref<Player[]>(loadedPlayers)
+
+  // Load Saved Teams
+  const savedTeams = ref<SavedTeamLol[]>([])
+  const loadedSavedTeams = localStorage.getItem(`${CACHE_KEY}_saved_teams`)
+  if (loadedSavedTeams) {
+    savedTeams.value = JSON.parse(loadedSavedTeams)
+  }
 
   watch(
     [teamName, date, isTransparentBg, players],
@@ -131,6 +153,90 @@ export function useLolRoster(): UseLolRosterReturn {
     }
   }
 
+  const exportData = () => {
+    const data = {
+      teamName: teamName.value,
+      date: date.value,
+      isTransparentBg: isTransparentBg.value,
+      players: players.value,
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data))
+    const downloadAnchorNode = document.createElement('a')
+    downloadAnchorNode.setAttribute("href", dataStr)
+    downloadAnchorNode.setAttribute("download", `${teamName.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_lol_roster.json`)
+    document.body.appendChild(downloadAnchorNode)
+    downloadAnchorNode.click()
+    downloadAnchorNode.remove()
+  }
+
+  const importDataFromString = (jsonString: string) => {
+    try {
+      const data = JSON.parse(jsonString)
+      if (data.teamName !== undefined) teamName.value = data.teamName
+      if (data.date !== undefined) date.value = data.date
+      if (data.isTransparentBg !== undefined) isTransparentBg.value = data.isTransparentBg
+      if (data.players !== undefined) players.value = data.players
+    } catch (e) {
+      console.error("Fehler beim Importieren der Daten:", e)
+      throw new Error("Ungültige Roster-Daten")
+    }
+  }
+
+  const importData = async (file: File) => {
+    try {
+      const text = await file.text()
+      importDataFromString(text)
+    } catch (e) {
+      console.error("Fehler beim Lesen der Datei:", e)
+      throw new Error("Dateifehler")
+    }
+  }
+
+  const getShareLink = (): string => {
+    const data = {
+      teamName: teamName.value,
+      date: date.value,
+      isTransparentBg: isTransparentBg.value,
+      players: players.value,
+    }
+    const jsonStr = JSON.stringify(data)
+    // UTF-8 safe base64 encoding
+    const base64 = window.btoa(unescape(encodeURIComponent(jsonStr)))
+    return `${window.location.origin}${window.location.pathname}?data=${base64}`
+  }
+
+  const saveTeam = (name: string) => {
+    const data = {
+      teamName: teamName.value,
+      date: date.value,
+      isTransparentBg: isTransparentBg.value,
+      players: players.value,
+    }
+    const newSave: SavedTeamLol = {
+      id: Date.now().toString(),
+      name,
+      dateSaved: Date.now(),
+      data
+    }
+    savedTeams.value.push(newSave)
+    localStorage.setItem(`${CACHE_KEY}_saved_teams`, JSON.stringify(savedTeams.value))
+  }
+
+  const loadTeam = (id: string) => {
+    const save = savedTeams.value.find(s => s.id === id)
+    if (!save) return
+    const data = save.data
+    if (data.teamName !== undefined) teamName.value = data.teamName
+    if (data.date !== undefined) date.value = data.date
+    if (data.isTransparentBg !== undefined) isTransparentBg.value = data.isTransparentBg
+    if (data.players !== undefined) players.value = data.players
+  }
+
+  const deleteTeam = (id: string) => {
+    savedTeams.value = savedTeams.value.filter(s => s.id !== id)
+    localStorage.setItem(`${CACHE_KEY}_saved_teams`, JSON.stringify(savedTeams.value))
+  }
+
   return {
     teamName,
     date,
@@ -143,6 +249,14 @@ export function useLolRoster(): UseLolRosterReturn {
     dropHero,
     removeHero,
     toggleMainHero,
-    resetRoster
+    resetRoster,
+    exportData,
+    importData,
+    importDataFromString,
+    getShareLink,
+    savedTeams,
+    saveTeam,
+    loadTeam,
+    deleteTeam
   }
 }
