@@ -22,7 +22,8 @@ A web app for building, customizing, and exporting team rosters for different ga
 ## Demo
 <img src="demo/readme_demo1.png" alt="App Screenshot" height="600">
 <img src="demo/readme_demo_ow.png" alt="App Screenshot" height="600">
-<img src="demo/readme_demo_lol.png" alt="App Screenshot" height="600">
+
+Find more images in the demo [directory](https://github.com/LeipzigeSports/les-roster-generator/tree/master/demo).
 
 ## Getting Started
 
